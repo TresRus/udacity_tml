@@ -37,28 +37,47 @@ def compute_daily_returns(df):
     """Compute and return the daily return values."""
     return (df / df.shift(1)) - 1
 
+
 def normolize(df):
     """Normalize data by first row"""
     return df / df.ix[0]
 
-def portfolio_val(df, allocates, cost):
+
+def portfolio_val(df, allocates, cost=1.0):
     port = normolize(df) * allocates
     port = port * cost
 
     return port.sum(axis=1)
+
 
 def sharpe_ratio(df, daily_free_risk):
     daily_returns = compute_daily_returns(df)
 
     return (daily_returns.mean() - daily_free_risk) / daily_returns.std() * math.sqrt(252)
 
+
+
+def daily_free_risk():
+    return (1.08 ** (1 / 365) - 1.0)
+
+
 def print_statistic(df, daily_free_risk):
     daily_returns = compute_daily_returns(df)
 
-    print "Cumulative return ", df.ix[-1] - df.ix[0]
-    print "Avg. daily return ", daily_returns.mean()
-    print "Risk ", daily_returns.std()
-    print "Sharpe ratio (year) ", sharpe_ratio(df, daily_free_risk)
+    print "Cumulative return:"
+    print df.ix[-1] - df.ix[0]
+    print "Avg. daily return:"
+    print daily_returns.mean()
+    print "Risk:"
+    print daily_returns.std()
+    print "Sharpe ratio (year):"
+    print sharpe_ratio(df, daily_free_risk)
+
+
+def print_allocations(allocates, symbols):
+    for x in range(len(allocates)):
+        print symbols[x], " - ", allocates[x]
+
 
 def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Price"):
     """Plot stock data with appropriate axis labels."""
