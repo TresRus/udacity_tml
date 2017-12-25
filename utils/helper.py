@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import math
+import utils
 
 def fill_missing_values(df_data):
     """Fill missing values in data frame, in place."""
@@ -35,7 +36,9 @@ def get_data(symbols, dates):
 
 def compute_daily_returns(df):
     """Compute and return the daily return values."""
-    return (df / df.shift(1)) - 1
+    dr = (df / df.shift(1)) - 1
+    dr.ix[0, :] = 0
+    return dr
 
 
 def normolize(df):
@@ -54,7 +57,6 @@ def sharpe_ratio(df, daily_free_risk):
     daily_returns = compute_daily_returns(df)
 
     return (daily_returns.mean() - daily_free_risk) / daily_returns.std() * math.sqrt(252)
-
 
 
 def daily_free_risk():
@@ -99,7 +101,8 @@ def plot_scatter(df, symbols, base):
         if symbol == base:
             continue
         df.plot(kind='scatter', x=base, y=symbol)
-        #c = np.polyfit(df[base], df[symbol], 1)
-        #plt.plot(df[base], c[0] * df[base] + c[1], '-', color='r')
+        lgl = utils.LinRegLearner()
+        lgl.train(df[base], df[symbol])
+        plt.plot(df[base], lgl.query(df[base]), '-', color='r')
         plt.show()
 

@@ -8,12 +8,12 @@ def test_run():
     """Function called by Test Run."""
     symbol_list = ["SPY", "GOOG", "AAPL", "XOM"]
     start_date = "2010-12-31"
-    end_date = "2011-12-31"
+    end_date = "2011-06-30"
     dates = pd.date_range(start_date, end_date)
     df_data = utils.get_data(symbol_list, dates)
     utils.fill_missing_values(df_data)
 
-    utils.plot_data(df_data)
+    # utils.plot_data(df_data)
 
     daily_returns = utils.compute_daily_returns(df_data)
     # unitls.plot_data(daily_returns, title="Daily returns", ylabel="Daily returns")
