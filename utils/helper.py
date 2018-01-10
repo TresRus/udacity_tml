@@ -16,7 +16,7 @@ def symbol_to_path(symbol, base_dir="data"):
     return os.path.join(base_dir, "{}.csv".format(str(symbol)))
 
 
-def get_data(symbols, dates):
+def get_snp_data(symbols, dates):
     """Read stock data (adjusted close) for given symbols from CSV files."""
     df_final = pd.DataFrame(index=dates)
     if "SPY" not in symbols:  # add SPY for reference, if absent
@@ -28,8 +28,21 @@ def get_data(symbols, dates):
             usecols=["Date", "Adj Close"], na_values=["nan"])
         df_temp = df_temp.rename(columns={"Adj Close": symbol})
         df_final = df_final.join(df_temp)
-    if symbol == "SPY":  # drop dates SPY did not trade
-        df_final = df_final.dropna(subset=["SPY"])
+        if symbol == "SPY":  # drop dates SPY did not trade
+            df_final = df_final.dropna(subset=["SPY"])
+
+    return df_final
+
+def get_data(symbols, dates, base_dir="data"):
+    """Read stock data (adjusted close) for given symbols from CSV files."""
+    df_final = pd.DataFrame(index=dates)
+
+    for symbol in symbols:
+        file_path = symbol_to_path(symbol, base_dir)
+        df_temp = pd.read_csv(file_path, parse_dates=True, index_col="Date",
+            usecols=["Date", "Close"], na_values=["nan"])
+        df_temp = df_temp.rename(columns={"Close": symbol})
+        df_final = df_final.join(df_temp)
 
     return df_final
 

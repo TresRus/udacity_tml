@@ -10,7 +10,7 @@ def test_run():
     start_date = "2010-12-31"
     end_date = "2011-06-30"
     dates = pd.date_range(start_date, end_date)
-    df_data = utils.get_data(symbol_list, dates)
+    df_data = utils.get_snp_data(symbol_list, dates)
     utils.fill_missing_values(df_data)
 
     # utils.plot_data(df_data)

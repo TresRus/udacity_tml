@@ -29,13 +29,13 @@ def test_run():
     start_date = "2015-01-01"
     end_date = "2016-01-01"
     dates = pd.date_range(start_date, end_date)
-    df_data = utils.get_data(symbol_list, dates)
+    df_data = utils.get_snp_data(symbol_list, dates)
     utils.fill_missing_values(df_data)
 
     norm = utils.normolize(df_data)
     utils.print_statistic(norm, utils.daily_free_risk())
 
-    market = utils.normolize(utils.get_data(["SPY"], dates))
+    market = utils.normolize(utils.get_snp_data(["SPY"], dates))
 
     result_allocates = fit_line(df_data, reverse_sr)
     utils.print_allocations(result_allocates, symbol_list)
