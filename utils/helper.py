@@ -54,6 +54,17 @@ def compute_daily_returns(df):
     return dr
 
 
+def compute_momentum(df, window):
+    dr = (df - df.shift(window))
+    dr.ix[0:window, :] = 0
+    return dr
+
+def compute_moving_avg(df, window):
+    dr = df.rolling(window).mean()
+    dr.ix[0:window, :] = 0
+    return dr
+
+
 def normolize(df):
     """Normalize data by first row"""
     return df / df.ix[0]

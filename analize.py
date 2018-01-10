@@ -52,12 +52,12 @@ class SuperEnsembleLerner:
 
 def main():
     currencies = {
-        'USDT': 'tether',
-        'ETH': 'ethereum',
-        'XRP': 'ripple',
+#        'USDT': 'tether',
+#        'ETH': 'ethereum',
+#        'XRP': 'ripple',
         'NEO': 'neo',
-        'XVG': 'verge',
-        'ICX': 'icon'
+#        'XVG': 'verge',
+#        'ICX': 'icon'
     }
 
     horizon = 300
@@ -92,11 +92,16 @@ def main():
         test_rename[name] = "%s-test" % (name)
     test_ndf = test_ndf.rename(columns=test_rename)
 
-    res_df = pd.concat([learn_ndf, test_ndf])
-    utils.plot_data(res_df)
+    #utils.plot_data(ndf)
 
-    daily_ret = utils.compute_daily_returns(res_df)
-    utils.plot_data(daily_ret)
+    daily_ret = utils.compute_daily_returns(ndf) * df.max()
+    #utils.plot_data(daily_ret)
+
+    momentum = utils.compute_momentum(ndf, window)
+    ma = utils.compute_moving_avg(ndf, window)
+
+    res = ndf.join(daily_ret, rsuffix='_return').join(momentum, rsuffix='_momentum').join(ma, rsuffix='_moving_avg')
+    utils.plot_data(res)
 
 if __name__ == "__main__":
     main()
