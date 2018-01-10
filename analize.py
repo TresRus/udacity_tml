@@ -49,20 +49,32 @@ class SuperEnsembleLerner:
 
         return np.mean(pred)
 
+def plot_info(ndf, window):
+    daily_ret = utils.compute_daily_returns(ndf) * ndf.mean()
+
+    momentum = utils.compute_momentum(ndf, window)
+    ma = utils.compute_moving_avg(ndf, window)
+    ms = utils.compute_moving_std(ndf, window)
+    ubb = ma + ms * 2;
+    lbb = ma - ms * 2;
+
+    res = ndf.join(daily_ret, rsuffix='_return').join(momentum, rsuffix='_momentum').join(
+            ma, rsuffix='_moving_avg').join(ubb, rsuffix='_upper_bb').join(lbb, rsuffix='_lower_bb')
+    utils.plot_data(res)
 
 def main():
     currencies = {
-#        'USDT': 'tether',
-#        'ETH': 'ethereum',
-#        'XRP': 'ripple',
+        'USDT': 'tether',
+        'ETH': 'ethereum',
+        'XRP': 'ripple',
         'NEO': 'neo',
-#        'XVG': 'verge',
-#        'ICX': 'icon'
+        'XVG': 'verge',
+        'ICX': 'icon'
     }
 
-    horizon = 300
+    horizon = 100
     learn_pool = 200
-    window = 40
+    window = 20
     predict = 10
 
     data_start = datetime.date(2009, 1, 1)
@@ -84,6 +96,7 @@ def main():
     utils.fill_missing_values(df)
     ndf = utils.normolize(df)
 
+    """
     learn_ndf = ndf[:learn_pool+1]
     test_ndf = ndf[learn_pool:]
 
@@ -91,17 +104,11 @@ def main():
     for name in currencies.keys():
         test_rename[name] = "%s-test" % (name)
     test_ndf = test_ndf.rename(columns=test_rename)
+    """
+    
+    for name in currencies.keys():
+        plot_info(ndf[[name]], window)
 
-    #utils.plot_data(ndf)
-
-    daily_ret = utils.compute_daily_returns(ndf) * df.max()
-    #utils.plot_data(daily_ret)
-
-    momentum = utils.compute_momentum(ndf, window)
-    ma = utils.compute_moving_avg(ndf, window)
-
-    res = ndf.join(daily_ret, rsuffix='_return').join(momentum, rsuffix='_momentum').join(ma, rsuffix='_moving_avg')
-    utils.plot_data(res)
 
 if __name__ == "__main__":
     main()

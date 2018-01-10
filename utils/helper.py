@@ -61,9 +61,13 @@ def compute_momentum(df, window):
 
 def compute_moving_avg(df, window):
     dr = df.rolling(window).mean()
-    dr.ix[0:window, :] = 0
+    dr.ix[0:window, :] = df.ix[0:window, :]
     return dr
 
+def compute_moving_std(df, window):
+    dr = df.rolling(window).std()
+    dr.ix[0:window, :] = 0
+    return dr
 
 def normolize(df):
     """Normalize data by first row"""
