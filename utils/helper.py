@@ -50,7 +50,9 @@ def portfolio_val(df, allocates, cost=1.0):
     port = normolize(df) * allocates
     port = port * cost
 
-    return port.sum(axis=1)
+    dr = port.sum(axis=1)
+    dr.name = "Portfolio"
+    return dr.to_frame()
 
 
 def sharpe_ratio(df, daily_free_risk):

@@ -41,7 +41,6 @@ def test_run():
     utils.print_allocations(result_allocates, symbol_list)
 
     portfolio = utils.portfolio_val(df_data, result_allocates)
-    portfolio.name = "Portfolio"
     market = market.join(portfolio)
 
     utils.print_statistic(market, utils.daily_free_risk())
