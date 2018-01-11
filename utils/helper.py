@@ -69,6 +69,11 @@ def compute_moving_std(df, window):
     dr.ix[0:window, :] = 0
     return dr
 
+def compute_prediction(df, predict):
+    """Compute and return the daily return values."""
+    dr = df.shift(-predict)
+    return dr
+
 def normolize(df):
     """Normalize data by first row"""
     return df / df.ix[0]
