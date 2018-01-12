@@ -2,6 +2,7 @@ import requests
 import datetime
 import csv
 import os
+import json
 from lxml import html
 
 
@@ -46,19 +47,38 @@ def load_currency(name, full, from_date, to_date, save_html=False):
             csv_wr.writerow(rd)
 
 
-def main():
-    currencies = {
-        'ETH': 'ethereum',
-        'XRP': 'ripple'
-    }
+def load_top100(save_html=False):
+    url = 'https://coinmarketcap.com/'
+    req = requests.get(url)
+    if save_html:
+        if not os.path.exists('htmls'):
+            os.makedirs('htmls')
 
-    start = datetime.date(2009, 1, 1)
+        with open('htmls/top100.html' % name, 'w') as out:
+            out.write(req.text.encode(req.encoding))
 
-    now = datetime.datetime.now()
-    begin = now - datetime.timedelta(days=5)
+    tree = html.fromstring(req.text.encode(req.encoding))
+    table = tree.xpath('//tbody')[0]
+    res = {}
+    for row in table.xpath('.//tr'):
+        currency = row.xpath('.//td')[1]
+        data = currency.xpath('./span/a')[0]
+        name = data.text
+        link = data.get("href")[12:-1]
+        res[name] = link
 
-    load_dict(currencies, begin, now)
+    with open('top100.json', 'w') as jf:
+        json.dump(res, jf)
+
+def run():
+    load_top100()
+    load_currencies = json.load(open('top100.json'))
+
+    begin = datetime.date(2009, 1, 1)
+    end = datetime.datetime.now()
+
+    load_dict(load_currencies, begin, end)
 
 
 if __name__ == "__main__":
-    main()
+    run()

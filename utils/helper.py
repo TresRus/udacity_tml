@@ -33,18 +33,20 @@ def get_snp_data(symbols, dates):
 
     return df_final
 
-def get_data(symbols, dates, base_dir="data"):
+def get_data(symbols, params, dates, base_dir="data"):
     """Read stock data (adjusted close) for given symbols from CSV files."""
-    df_final = pd.DataFrame(index=dates)
+    data = {}
+    for param in params:
+        df_final = pd.DataFrame(index=dates)
+        for symbol in symbols:
+            file_path = symbol_to_path(symbol, base_dir)
+            df_temp = pd.read_csv(file_path, parse_dates=True, index_col="Date",
+                usecols=["Date", param], na_values=["nan"])
+            df_temp = df_temp.rename(columns={param: symbol})
+            df_final = df_final.join(df_temp)
+        data[param] = df_final
 
-    for symbol in symbols:
-        file_path = symbol_to_path(symbol, base_dir)
-        df_temp = pd.read_csv(file_path, parse_dates=True, index_col="Date",
-            usecols=["Date", "Close"], na_values=["nan"])
-        df_temp = df_temp.rename(columns={"Close": symbol})
-        df_final = df_final.join(df_temp)
-
-    return df_final
+    return data
 
 
 def compute_daily_returns(df):
@@ -131,13 +133,26 @@ def plot_hist(df, symbols, bins=20):
     plt.show()
 
 
+def count_betas(df, symbols, base):
+    res = ()
+    for symbol in symbols:
+        if symbol == base:
+            continue
+        df.plot(kind='scatter', x=base, y=symbol)
+        b, a = np.polyfit(df[base], df[symbol], 1)
+        res = res + (b,)
+    return res
+
+
 def plot_scatter(df, symbols, base):
     for symbol in symbols:
         if symbol == base:
             continue
         df.plot(kind='scatter', x=base, y=symbol)
+        b, a = np.polyfit(df[base], df[symbol], 1)
         lgl = utils.LinRegLearner()
         lgl.train(df[base], df[symbol])
+        print symbol, lgl.m, b
         plt.plot(df[base], lgl.query(df[base]), '-', color='r')
         plt.show()
 
