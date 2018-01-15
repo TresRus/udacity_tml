@@ -145,8 +145,8 @@ def get_market_data(dates):
     return price.sum(axis=1).to_frame(name='Market')
 
 def main():
-    analize_currencies = ['ETH', 'XRP', 'NEO', 'XVG']
-    # analize_currencies = ['ETH']
+    analize_currencies = ['ETH', 'XRP', 'NEO', 'XVG', 'GNT', 'XRB', 'ADA', 'XEM', 'XMR']
+    # analize_currencies = json.load(open('top100.json'))
     analize_params = ['Close']
 
     horizon = 300
