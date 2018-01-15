@@ -19,18 +19,18 @@ class SuperEnsembleLerner:
     def __init__(self):
         self.learners = ()
         # ok
-        self.learners = self.learners + (GradientBoostingRegressor(learning_rate=0.05, n_estimators=100),)
+        self.learners = self.learners + (GradientBoostingRegressor(learning_rate=0.1, n_estimators=100),)
 
         # ok
-        self.learners = self.learners + (RandomForestRegressor(n_estimators=100),)
+        #self.learners = self.learners + (RandomForestRegressor(n_estimators=100),)
 
         # so so
-        self.learners = self.learners + \
-            (AdaBoostRegressor(base_estimator=MLPRegressor(hidden_layer_sizes=(80, 30,)), n_estimators=300),)
+        #self.learners = self.learners + \
+        #    (AdaBoostRegressor(base_estimator=MLPRegressor(hidden_layer_sizes=(80, 30,)), n_estimators=300),)
 
         # so so
-        self.learners = self.learners + \
-            (AdaBoostRegressor(base_estimator=LinearRegression(), n_estimators=100),)
+        #self.learners = self.learners + \
+        #    (AdaBoostRegressor(base_estimator=LinearRegression(), n_estimators=100),)
 
         # bad
         #self.learners = self.learners + \
@@ -47,6 +47,7 @@ class SuperEnsembleLerner:
     def fit(self, X, y):
         for learner in self.learners:
             learner.fit(X, y)
+            print learner.feature_importances_
 
     def predict(self, X):
         pred = ()
@@ -55,61 +56,95 @@ class SuperEnsembleLerner:
 
         return np.mean(pred, axis=0)
 
-    def print_params(self):
-        for learner in self.learners:
-            print learner.get_params()
-            print learner.feature_importances_
 
+def plot_info(name, df, window):
+    ma = utils.compute_moving_avg(df, window)
+    mah = utils.compute_moving_avg(df, window / 2)
+    maq = utils.compute_moving_avg(df, window / 4)
 
-def plot_info(ndf, window):
-    daily_ret = utils.compute_daily_returns(ndf) * ndf.mean()
-
-    momentum = utils.compute_momentum(ndf, window)
-    ma = utils.compute_moving_avg(ndf, window)
-    ms = utils.compute_moving_std(ndf, window)
+    ms = utils.compute_moving_std(df, window)
     ubb = ma + ms * 2
     lbb = ma - ms * 2
 
-    res = ndf.join(
-        daily_ret,
-        rsuffix='_return').join(
-        momentum,
-        rsuffix='_momentum').join(
+    emal = utils.compute_exp_moving_avg(df, window)
+    emas = utils.compute_exp_moving_avg(df, window / 2)
+    emad = emas - emal
+    macd = utils.compute_exp_moving_avg(emad, window / 3)
+
+    rs = utils.compute_reletive_strength(df, window)
+    rsi = 100 - 100 / (1 + rs)
+
+    r1 = df.join(
             ma,
             rsuffix='_moving_avg').join(
                 ubb,
                 rsuffix='_upper_bb').join(
                     lbb,
                     rsuffix='_lower_bb')
-    utils.plot_data(res)
+    r2 = df.join(
+            mah,
+            rsuffix='_moving_avg_h').join(
+            maq,
+            rsuffix='_moving_avg_q')
+    r3 = emad.join(
+            macd,
+            rsuffix='_macd')
+    r4 = rsi
+    plot_num = window * 2
+    utils.plot_to_pdf(name, (r1[-plot_num:], r2[-plot_num:], r3[-plot_num:], r4[-plot_num:]))
 
 
 def prepare_input(df, window, predict):
-    daily_ret = utils.compute_daily_returns(df)
     momentum = utils.compute_momentum(df, window)
     ma = utils.compute_moving_avg(df, window)
+    maq = utils.compute_moving_avg(df, window / 4)
+    ma_hist = maq - ma
+
     ms = utils.compute_moving_std(df, window)
 
-    res = daily_ret.join(
-        momentum,
-        rsuffix='_momentum').join(
-            ma,
-            rsuffix='_moving_avg').join(
+    emal = utils.compute_exp_moving_avg(df, window)
+    emas = utils.compute_exp_moving_avg(df, window / 2)
+    emad = emas - emal
+    macd = utils.compute_exp_moving_avg(emad, window / 3)
+    macd_hist = emad - macd
+
+    rs = utils.compute_reletive_strength(df, window)
+
+    res = momentum.join(
+            ma_hist,
+            rsuffix='_moving_avg_hist').join(
                 ms,
-                rsuffix='_moving_std')
+                rsuffix='_moving_std').join(
+                macd_hist,
+                rsuffix='_macd_hist').join(
+                rs,
+                rsuffix="_rs")
+    res = res[window:-predict]
+    utils.plot_data(res)
     res = (res - res.mean()) / res.std()
-    return res[window:-predict]
+    utils.plot_data(res)
+    return res
 
 
 def prepare_output(df, window, predict):
     pred = utils.compute_prediction(df, predict)
     return pred[window:-predict]
 
-
-def main():
+def get_market_data(dates):
     load_currencies = json.load(open('top100.json'))
     load_params = ['Close', 'Market Cap']
 
+    all_data = utils.get_data(load_currencies.keys(), load_params, dates, 'cc_data')
+    for _, stock in all_data.iteritems():
+        utils.fill_missing_values(stock)
+
+    mc = all_data['Market Cap']
+    mc = mc / mc.sum()
+
+    price = all_data['Close'] * mc
+    return price.sum(axis=1).to_frame(name='Market')
+
+def main():
     analize_currencies = ['ETH', 'XRP', 'NEO', 'XVG']
     # analize_currencies = ['ETH']
     analize_params = ['Close']
@@ -129,61 +164,34 @@ def main():
         df_start.strftime('%Y-%m-%d'),
         df_end.strftime('%Y-%m-%d'))
 
-    all_data = utils.get_data(load_currencies.keys(), load_params, dates, 'cc_data')
-    for _, stock in all_data.iteritems():
-        utils.fill_missing_values(stock)
-
-    mc = all_data['Market Cap']
-    mc = mc / mc.sum()
-
-    price = all_data['Close'] * mc
-    market = price.sum(axis=1).to_frame(name='Market')
+    market = get_market_data(dates)
     n_market = utils.normolize(market)
-    n_prices = utils.normolize(all_data['Close'])
 
     data = utils.get_data(analize_currencies, analize_params, dates, 'cc_data')
     for _, stock in data.iteritems():
         utils.fill_missing_values(stock)
-    n_stocks = utils.normolize(data['Close'])
-
-    n_full = n_stocks.join(n_market)
-    n_full = utils.normolize(n_full[:30])
-    # utils.plot_data(n_full)
-    # n_nm = n_full.sub(n_full['Market'], axis=0)
-    # utils.plot_data(n_nm)
-    dr_full = utils.compute_daily_returns(n_full)
-    betas = utils.count_betas(dr_full, analize_currencies, 'Market')
-
-    print dr_full.corr(method='pearson')
-
-    return
+    stocks = data['Close']
+    n_stocks = utils.normolize(stocks)
 
     """
-    full_df = prepare_data(ndf, window, predict)
-    learn_ndf = full_df[:learn_pool+1]
-    test_ndf = full_df[learn_pool:]
-
-    test_rename = {}
-    for name in analize_currencies:
-        test_rename[name] = "%s-test" % (name)
-    test_ndf = test_ndf.rename(columns=test_rename)
+    full = stocks.join(market)
+    n_full = utils.normolize(full[:window])
+    utils.plot_data(n_full)
+    utils.plot_data(utils.compute_daily_returns(n_full))
     """
 
     for name in analize_currencies:
-        # plot_info(ndf[[name]], window)
-        X = prepare_input(ndf[[name]], window, predict)
-        utils.plot_data(X)
+        plot_info(name, stocks[[name]], window)
 
         """
-        X = prepare_input(ndf[[name]], window, predict)
-        Y = prepare_output(ndf[[name]], window, predict)
+        X = prepare_input(stocks[[name]], window, predict)
+        Y = prepare_output(stocks[[name]], window, predict)
         X_learn = X[:learn_pool + 1]
         Y_learn = Y[:learn_pool + 1]
         X_test = X[learn_pool:]
         Y_test = Y[learn_pool:]
         learner = SuperEnsembleLerner()
         learner.fit(X_learn, Y_learn)
-        # learner.print_params()
         test_pred = learner.predict(X_test)
         Y_test["%s_pred-test" % (name)] = test_pred
         Y_test = Y_test.rename(columns={ name: "%s-test" % (name) })

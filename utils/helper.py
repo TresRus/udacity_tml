@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import os
 import math
@@ -11,9 +12,9 @@ def fill_missing_values(df_data):
     df_data.fillna(method='bfill', inplace=True)
 
 
-def symbol_to_path(symbol, base_dir="data"):
+def symbol_to_path(symbol, base_dir="data", ext="csv"):
     """Return CSV file path given ticker symbol."""
-    return os.path.join(base_dir, "{}.csv".format(str(symbol)))
+    return os.path.join(base_dir, "{}.{}".format(str(symbol), str(ext)))
 
 
 def get_snp_data(symbols, dates):
@@ -66,10 +67,33 @@ def compute_moving_avg(df, window):
     dr.ix[0:window, :] = df.ix[0:window, :]
     return dr
 
+def compute_exp_moving_avg(df, window):
+    dr = df.ewm(span=window).mean()
+    dr.ix[0:window, :] = df.ix[0:window, :]
+    return dr
+
 def compute_moving_std(df, window):
     dr = df.rolling(window).std()
     dr.ix[0:window, :] = 0
     return dr
+
+def compute_reletive_strength(df, window):
+    delta = df.diff()
+
+    up = delta.copy()
+    up[up < 0] = 0
+
+    down = delta.copy()
+    down[down > 0] = 0
+
+    ru = up.ewm(span=window).mean().abs()
+    rd = down.ewm(span=window).mean().abs()
+
+    res = ru / rd
+    res.fillna(method='ffill', inplace=True)
+
+    return res
+
 
 def compute_prediction(df, predict):
     """Compute and return the daily return values."""
@@ -124,6 +148,17 @@ def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Price"):
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     plt.show()
+
+def plot_to_pdf(name, dfs, title="Stock prices", xlabel="Date", ylabel="Price"):
+    if not os.path.exists('plots'):
+        os.makedirs('plots')
+    with PdfPages(symbol_to_path(name, 'plots', 'pdf')) as pdf:
+        for df in dfs:
+            ax = df.plot(title=title, fontsize=8)
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(ylabel)
+            pdf.savefig()
+            plt.close()
 
 
 def plot_hist(df, symbols, bins=20):
