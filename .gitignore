@@ -3,3 +3,5 @@ htmls
 cc_data
 top100.json
 plots
+*.swp
+data/
