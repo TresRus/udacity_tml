@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import utils
 
+
 def test_run():
     """Function called by Test Run."""
     symbol_list = ["SPY", "GOOG", "AAPL", "XOM"]
@@ -27,4 +28,3 @@ def test_run():
 
 if __name__ == "__main__":
     test_run()
-

@@ -4,8 +4,11 @@ import matplotlib.pyplot as plt
 import os
 import utils
 
+
 def f(allocates, df):
-    return utils.sharpe_ratio(utils.portfolio_val(df, allocates), (1.08 ** (1 / 365) - 1.0)) * -1;
+    return utils.sharpe_ratio(utils.portfolio_val(
+        df, allocates), (1.08 ** (1 / 365) - 1.0)) * -1
+
 
 def test_run():
     """Function called by Test Run."""
@@ -26,4 +29,3 @@ def test_run():
 
 if __name__ == "__main__":
     test_run()
-

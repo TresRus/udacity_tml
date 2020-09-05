@@ -8,6 +8,7 @@ import utils
 import datetime
 import argparse
 
+
 def fill_missing_values(df_data):
     """Fill missing values in data frame, in place."""
     df_data.fillna(method='ffill', inplace=True)
@@ -28,13 +29,14 @@ def get_snp_data(symbols, dates):
     for symbol in symbols:
         file_path = symbol_to_path(symbol)
         df_temp = pd.read_csv(file_path, parse_dates=True, index_col="Date",
-            usecols=["Date", "Adj Close"], na_values=["nan"])
+                              usecols=["Date", "Adj Close"], na_values=["nan"])
         df_temp = df_temp.rename(columns={"Adj Close": symbol})
         df_final = df_final.join(df_temp)
         if symbol == "SPY":  # drop dates SPY did not trade
             df_final = df_final.dropna(subset=["SPY"])
 
     return df_final
+
 
 def get_data(symbols, params, dates, base_dir="data"):
     """Read stock data (adjusted close) for given symbols from CSV files."""
@@ -43,8 +45,14 @@ def get_data(symbols, params, dates, base_dir="data"):
         df_final = pd.DataFrame(index=dates)
         for symbol in symbols:
             file_path = symbol_to_path(symbol, base_dir)
-            df_temp = pd.read_csv(file_path, parse_dates=True, index_col="Date",
-                usecols=["Date", param], na_values=["nan"])
+            df_temp = pd.read_csv(
+                file_path,
+                parse_dates=True,
+                index_col="Date",
+                usecols=[
+                    "Date",
+                    param],
+                na_values=["nan"])
             df_temp = df_temp.rename(columns={param: symbol})
             df_final = df_final.join(df_temp)
         data[param] = df_final
@@ -64,20 +72,24 @@ def compute_momentum(df, window):
     dr.ix[0:window, :] = 0
     return dr
 
+
 def compute_moving_avg(df, window):
     dr = df.rolling(window).mean()
     dr.ix[0:window, :] = df.ix[0:window, :]
     return dr
+
 
 def compute_exp_moving_avg(df, window):
     dr = df.ewm(span=window).mean()
     dr.ix[0:window, :] = df.ix[0:window, :]
     return dr
 
+
 def compute_moving_std(df, window):
     dr = df.rolling(window).std()
     dr.ix[0:window, :] = 0
     return dr
+
 
 def compute_reletive_strength(df, window):
     delta = df.diff()
@@ -102,6 +114,7 @@ def compute_prediction(df, predict):
     dr = df.shift(-predict)
     return dr
 
+
 def normalize(df):
     """Normalize data by first row"""
     return df / df.ix[0]
@@ -119,7 +132,8 @@ def portfolio_val(df, allocates, cost=1.0):
 def sharpe_ratio(df, daily_free_risk):
     daily_returns = compute_daily_returns(df)
 
-    return (daily_returns.mean() - daily_free_risk) / daily_returns.std() * math.sqrt(252)
+    return (daily_returns.mean() - daily_free_risk) / \
+        daily_returns.std() * math.sqrt(252)
 
 
 def daily_free_risk():
@@ -151,7 +165,13 @@ def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Price"):
     ax.set_ylabel(ylabel)
     plt.show()
 
-def plot_to_pdf(name, dfs, title="Stock prices", xlabel="Date", ylabel="Price"):
+
+def plot_to_pdf(
+        name,
+        dfs,
+        title="Stock prices",
+        xlabel="Date",
+        ylabel="Price"):
     if not os.path.exists('plots'):
         os.makedirs('plots')
     with PdfPages(symbol_to_path(name, 'plots', 'pdf')) as pdf:
@@ -193,10 +213,10 @@ def plot_scatter(df, symbols, base):
         plt.plot(df[base], lgl.query(df[base]), '-', color='r')
         plt.show()
 
-def date_arg( s ):
+
+def date_arg(s):
     try:
         return datetime.datetime.strptime(s, "%Y-%m-%d")
     except ValueError:
         msg = "Not a valid date: %s. Should be in forman YYYY-MM-DD (example: 2020-09-05)." % s
         raise argparse.ArgumentTypeError(msg)
-
