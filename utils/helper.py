@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import os
 import math
 import utils
+import datetime
+import argparse
 
 def fill_missing_values(df_data):
     """Fill missing values in data frame, in place."""
@@ -190,4 +192,11 @@ def plot_scatter(df, symbols, base):
         print symbol, lgl.m, b
         plt.plot(df[base], lgl.query(df[base]), '-', color='r')
         plt.show()
+
+def date_arg( s ):
+    try:
+        return datetime.datetime.strptime(s, "%Y-%m-%d")
+    except ValueError:
+        msg = "Not a valid date: %s. Should be in forman YYYY-MM-DD (example: 2020-09-05)." % s
+        raise argparse.ArgumentTypeError(msg)
 

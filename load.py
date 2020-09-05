@@ -3,7 +3,7 @@ import argparse
 from pandas_datareader import data as pdr
 import yfinance as yf
 
-def loadTicker(ticker, dataDir):
+def load_ticker(ticker, dataDir):
     csv = os.path.join(dataDir, "%s.csv" % ticker)
     print "Download %s to %s" % (ticker, csv)
     if not os.path.exists(dataDir):
@@ -24,7 +24,7 @@ def run():
     dataDir = os.path.join( rootDir, "data" )
 
     for ticker in args.tickers:
-        loadTicker( ticker, dataDir )
+        load_ticker( ticker, dataDir )
 
 if __name__ == "__main__":
     run()
