@@ -100,13 +100,13 @@ def compute_prediction(df, predict):
     dr = df.shift(-predict)
     return dr
 
-def normolize(df):
+def normalize(df):
     """Normalize data by first row"""
     return df / df.ix[0]
 
 
 def portfolio_val(df, allocates, cost=1.0):
-    port = normolize(df) * allocates
+    port = normalize(df) * allocates
     port = port * cost
 
     dr = port.sum(axis=1)

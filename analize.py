@@ -165,17 +165,17 @@ def main():
         df_end.strftime('%Y-%m-%d'))
 
     market = get_market_data(dates)
-    n_market = utils.normolize(market)
+    n_market = utils.normalize(market)
 
     data = utils.get_data(analize_currencies, analize_params, dates, 'cc_data')
     for _, stock in data.iteritems():
         utils.fill_missing_values(stock)
     stocks = data['Close']
-    n_stocks = utils.normolize(stocks)
+    n_stocks = utils.normalize(stocks)
 
     """
     full = stocks.join(market)
-    n_full = utils.normolize(full[:window])
+    n_full = utils.normalize(full[:window])
     utils.plot_data(n_full)
     utils.plot_data(utils.compute_daily_returns(n_full))
     """
