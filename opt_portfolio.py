@@ -1,3 +1,5 @@
+import os
+import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -5,7 +7,8 @@ import scipy.optimize as spo
 import utils
 
 def reverse_sr(allocates, df):
-    return utils.sharpe_ratio(utils.portfolio_val(df, allocates), utils.daily_free_risk()) * -1;
+    return utils.sharpe_ratio(utils.portfolio_val(df, allocates),
+                              utils.daily_free_risk()) * -1;
 
 def sum_one(allocates):
     return np.sum(allocates) - 1.0
@@ -13,23 +16,20 @@ def sum_one(allocates):
 def fit_line(df, error_func):
     column_num = df.shape[1]
     init_allocates = np.ones(column_num) / column_num
-
     limits = ()
     for x in range(column_num):
         limits += ((0.0, 1.0),)
 
     constr = {'type':'eq', 'fun':sum_one}
 
-    result = spo.minimize(error_func, init_allocates, args=(df,), method='SLSQP', bounds=limits, constraints=constr, options={'disp': True})
+    result = spo.minimize(error_func, init_allocates, args=(df,),
+                          method='SLSQP', bounds=limits,
+                          constraints=constr, options={'disp': True})
     return result.x
 
-def test_run():
-    """Function called by Test Run."""
-    symbol_list = ["SPY", "GOOG", "AAPL", "XOM", "GLD" ]
-    start_date = "2017-01-01"
-    end_date = "2019-01-01"
-    dates = pd.date_range(start_date, end_date)
-    df_data = utils.get_snp_data(symbol_list, dates)
+def optimize( tickers, start, end ):
+    dates = pd.date_range(start, end)
+    df_data = utils.get_snp_data(tickers, dates)
     utils.fill_missing_values(df_data)
 
     norm = utils.normalize(df_data)
@@ -38,7 +38,7 @@ def test_run():
     market = utils.normalize(utils.get_snp_data(["SPY"], dates))
 
     result_allocates = fit_line(df_data, reverse_sr)
-    utils.print_allocations(result_allocates, symbol_list)
+    utils.print_allocations(result_allocates, tickers)
 
     portfolio = utils.portfolio_val(df_data, result_allocates)
     market = market.join(portfolio)
@@ -47,7 +47,18 @@ def test_run():
 
     utils.plot_data(market)
 
+def run():
+    parser = argparse.ArgumentParser(description='Create optimal portfolio.')
+    parser.add_argument('tickers', metavar='T', type=str, nargs='+',
+                        help='ticker to include in portfolio')
+    parser.add_argument('-s', '--start', required=True, type=utils.date_arg,
+                        help="Evaluation start date")
+    parser.add_argument('-e', '--end', required=True, type=utils.date_arg,
+                        help="Evaluation end date")
+    args = parser.parse_args()
+
+    optimize( args.tickers, args.start, args.end )
 
 if __name__ == "__main__":
-    test_run()
+    run()
 
