@@ -25,17 +25,17 @@ def fit_line(df, error_func):
 
 def test_run():
     """Function called by Test Run."""
-    symbol_list = ["SPY", "GOOG", "AAPL", "XOM", "GLD"]
-    start_date = "2015-01-01"
-    end_date = "2016-01-01"
+    symbol_list = ["SPY", "GOOG", "AAPL", "XOM", "GLD" ]
+    start_date = "2017-01-01"
+    end_date = "2019-01-01"
     dates = pd.date_range(start_date, end_date)
     df_data = utils.get_snp_data(symbol_list, dates)
     utils.fill_missing_values(df_data)
 
-    norm = utils.normolize(df_data)
+    norm = utils.normalize(df_data)
     utils.print_statistic(norm, utils.daily_free_risk())
 
-    market = utils.normolize(utils.get_snp_data(["SPY"], dates))
+    market = utils.normalize(utils.get_snp_data(["SPY"], dates))
 
     result_allocates = fit_line(df_data, reverse_sr)
     utils.print_allocations(result_allocates, symbol_list)
