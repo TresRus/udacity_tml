@@ -3,48 +3,29 @@ import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import scipy.optimize as spo
 import utils
-
-
-def reverse_sr(allocates, df):
-    return utils.sharpe_ratio(utils.portfolio_val(df, allocates),
-                              utils.daily_free_risk()) * -1
-
-
-def sum_one(allocates):
-    return np.sum(allocates) - 1.0
-
-
-def fit_line(df, error_func):
-    column_num = df.shape[1]
-    init_allocates = np.ones(column_num) / column_num
-    limits = ()
-    for x in range(column_num):
-        limits += ((0.0, 1.0),)
-
-    constr = {'type': 'eq', 'fun': sum_one}
-
-    result = spo.minimize(error_func, init_allocates, args=(df,),
-                          method='SLSQP', bounds=limits,
-                          constraints=constr, options={'disp': True})
-    return result.x
 
 
 def optimize(tickers, start, end):
     dates = pd.date_range(start, end)
-    df_data = utils.get_snp_data(tickers, dates)
-    utils.fill_missing_values(df_data)
+    md = utils.MarketData(dates)
+    ac_data = md.add_param("Adj Close")
 
-    norm = utils.normalize(df_data)
+    ac_data.add_snp_baseline()
+    ac_data.add_tickers(tickers)
+    ac_data.fill_missing_values()
+
+    norm = ac_data.normalize()
     utils.print_statistic(norm, utils.daily_free_risk())
 
-    market = utils.normalize(utils.get_snp_data(["SPY"], dates))
+    print norm.head()
 
-    result_allocates = fit_line(df_data, reverse_sr)
-    utils.print_allocations(result_allocates, df_data.columns)
+    market = norm[['SPY']]
 
-    portfolio = utils.portfolio_val(df_data, result_allocates)
+    result_allocates = ac_data.fit_line(utils.reverse_sr)
+    utils.print_allocations(result_allocates, ac_data.df.columns)
+
+    portfolio = ac_data.portfolio_val(result_allocates)
     market = market.join(portfolio)
 
     utils.print_statistic(market, utils.daily_free_risk())

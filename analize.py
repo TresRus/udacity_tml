@@ -148,10 +148,10 @@ def get_market_data(dates):
     for _, stock in all_data.iteritems():
         utils.fill_missing_values(stock)
 
-    mc = all_data['Market Cap']
+    mc = all_data['Market Cap'].df
     mc = mc / mc.sum()
 
-    price = all_data['Close'] * mc
+    price = all_data['Close'].df * mc
     return price.sum(axis=1).to_frame(name='Market')
 
 
@@ -189,9 +189,9 @@ def main():
 
     data = utils.get_data(analize_currencies, analize_params, dates, 'cc_data')
     for _, stock in data.iteritems():
-        utils.fill_missing_values(stock)
+        stock.fill_missing_values()
     stocks = data['Close']
-    n_stocks = utils.normalize(stocks)
+    n_stocks = stocks.normalize()
 
     """
     full = stocks.join(market)
