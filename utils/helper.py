@@ -20,44 +20,56 @@ def symbol_to_path(symbol, base_dir="data", ext="csv"):
     return os.path.join(base_dir, "{}.{}".format(str(symbol), str(ext)))
 
 
-def get_snp_data(symbols, dates):
-    """Read stock data (adjusted close) for given symbols from CSV files."""
-    df_final = pd.DataFrame(index=dates)
-    if "SPY" not in symbols:  # add SPY for reference, if absent
-        symbols.insert(0, "SPY")
+class MarketData(object):
+    def __init__(self, dates):
+        self.dates = dates
+        self.data = {}
 
-    for symbol in symbols:
-        file_path = symbol_to_path(symbol)
+    def add_snp_baseline(self, param):
+        # SPY is S&P500 ETF and is used as reference stock.
+        # It should be always added to dataframe.
+        self.add_ticker("SPY", param)
+        # SPY is traded on every day that exchange is open.
+        # All the missing dates are not interesting for calculations.
+        self.data[param] = self.data[param].dropna(subset=["SPY"])
+
+    def add_param(self, param):
+        self.data[param] = pd.DataFrame(index=self.dates)
+
+    def add_ticker(self, ticker, param, base_dir="data"):
+        if param not in self.data:
+            self.add_param(param)
+
+        df = self.data[param]
+        if ticker in df.columns:
+            return
+
+        file_path = symbol_to_path(ticker, base_dir)
         df_temp = pd.read_csv(file_path, parse_dates=True, index_col="Date",
-                              usecols=["Date", "Adj Close"], na_values=["nan"])
-        df_temp = df_temp.rename(columns={"Adj Close": symbol})
-        df_final = df_final.join(df_temp)
-        if symbol == "SPY":  # drop dates SPY did not trade
-            df_final = df_final.dropna(subset=["SPY"])
-
-    return df_final
+                              usecols=["Date", param], na_values=["nan"])
+        df_temp = df_temp.rename(columns={param: ticker})
+        self.data[param] = df.join(df_temp)
 
 
-def get_data(symbols, params, dates, base_dir="data"):
+def get_snp_data(tickers, dates):
     """Read stock data (adjusted close) for given symbols from CSV files."""
-    data = {}
-    for param in params:
-        df_final = pd.DataFrame(index=dates)
-        for symbol in symbols:
-            file_path = symbol_to_path(symbol, base_dir)
-            df_temp = pd.read_csv(
-                file_path,
-                parse_dates=True,
-                index_col="Date",
-                usecols=[
-                    "Date",
-                    param],
-                na_values=["nan"])
-            df_temp = df_temp.rename(columns={param: symbol})
-            df_final = df_final.join(df_temp)
-        data[param] = df_final
+    md = MarketData(dates)
+    md.add_snp_baseline("Adj Close")
 
-    return data
+    for ticker in tickers:
+        md.add_ticker(ticker, "Adj Close")
+
+    return md.data["Adj Close"]
+
+
+def get_data(tickers, params, dates, base_dir="data"):
+    """Read stock data (adjusted close) for given symbols from CSV files."""
+    md = MarketData(dates)
+    for param in params:
+        md.add_param(param)
+        for ticker in tickers:
+            md.add_ticker(ticker, param, base_dir)
+    return md.data
 
 
 def compute_daily_returns(df):
