@@ -11,20 +11,19 @@ def plot_tickers(tickers, start, end):
     md = utils.MarketData(dates)
     ac_data = md.param("Adj Close")
 
-    ac_data.add_snp_baseline()
     ac_data.add_tickers(tickers)
     ac_data.fill_missing_values()
 
-    # utils.plot_data(ac_data.df)
+    utils.plot_data(ac_data.normalize())
 
-    daily_returns = utils.compute_daily_returns(ac_data.df)
+    # daily_returns = utils.compute_daily_returns(ac_data.df)
     # unitls.plot_data(daily_returns, title="Daily returns", ylabel="Daily returns")
 
     # utils.plot_hist(daily_returns, symbol_list)
     # daily_returns.hist(bins=20)
     # plt.show()
 
-    utils.plot_scatter(daily_returns, tickers, 'SPY')
+    # utils.plot_scatter(daily_returns, tickers, 'SPY')
 
 
 def run():
