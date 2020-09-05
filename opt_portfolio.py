@@ -9,7 +9,7 @@ import utils
 def optimize(tickers, start, end):
     dates = pd.date_range(start, end)
     md = utils.MarketData(dates)
-    ac_data = md.add_param("Adj Close")
+    ac_data = md.param("Adj Close")
 
     ac_data.add_snp_baseline()
     ac_data.add_tickers(tickers)

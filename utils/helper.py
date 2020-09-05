@@ -16,7 +16,8 @@ def symbol_to_path(symbol, base_dir="data", ext="csv"):
 
 
 class MarketDataParam(object):
-    def __init__(self, dates, param):
+    def __init__(self, dates, param, data_dir="data"):
+        self.data_dir = data_dir
         self.param = param
         self.df = pd.DataFrame(index=dates)
 
@@ -28,17 +29,17 @@ class MarketDataParam(object):
         # All the missing dates are not interesting for calculations.
         self.df = self.df.dropna(subset=["SPY"])
 
-    def add_ticker(self, ticker, base_dir="data"):
+    def add_ticker(self, ticker):
         if ticker in self.df.columns:
             return
 
-        file_path = symbol_to_path(ticker, base_dir)
+        file_path = symbol_to_path(ticker, self.data_dir)
         df_temp = pd.read_csv(file_path, parse_dates=True, index_col="Date",
                               usecols=["Date", self.param], na_values=["nan"])
         df_temp = df_temp.rename(columns={self.param: ticker})
         self.df = self.df.join(df_temp)
 
-    def add_tickers(self, tickers, base_dir="data"):
+    def add_tickers(self, tickers):
         for ticker in tickers:
             self.add_ticker(ticker)
 
@@ -75,35 +76,21 @@ class MarketDataParam(object):
 
 
 class MarketData(object):
-    def __init__(self, dates):
+    def __init__(self, dates, data_dir="data"):
+        self.data_dir = data_dir
         self.dates = dates
         self.data = {}
 
-    def add_param(self, param):
-        if param not in self.data:
-            self.data[param] = MarketDataParam(self.dates, param)
+    def param(self, name):
+        if name not in self.data:
+            self.data[name] = MarketDataParam(self.dates, name, self.data_dir)
 
-        return self.data[param]
+        return self.data[name]
 
-
-def get_snp_data(tickers, dates):
-    """Read stock data (adjusted close) for given symbols from CSV files."""
-    md = MarketData(dates)
-    ac_data = md.add_param("Adj Close")
-
-    ac_data.add_snp_baseline()
-    ac_data.add_tickers(tickers)
-
-    return ac_data.df
-
-
-def get_data(tickers, params, dates, base_dir="data"):
-    """Read stock data (adjusted close) for given symbols from CSV files."""
-    md = MarketData(dates)
-    for param in params:
-        param_data = md.add_param(param)
-        param_data.add_tickers(tickers, base_dir)
-    return md.data
+    def get_data(self, tickers, params):
+        for param in params:
+            param_data = self.param(param)
+            param_data = self.add_tickers(tickers)
 
 
 def compute_daily_returns(df):

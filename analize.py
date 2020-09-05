@@ -187,10 +187,11 @@ def main():
     market = get_market_data(dates)
     n_market = utils.normalize(market)
 
-    data = utils.get_data(analize_currencies, analize_params, dates, 'cc_data')
-    for _, stock in data.iteritems():
+    md = utils.MarketData(dates, data_dir='cc_data')
+    md.get_data(analize_currencies, analize_params)
+    for _, stock in md.data.iteritems():
         stock.fill_missing_values()
-    stocks = data['Close']
+    stocks = md.data['Close']
     n_stocks = stocks.normalize()
 
     """
