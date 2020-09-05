@@ -42,7 +42,7 @@ def optimize(tickers, start, end):
     market = utils.normalize(utils.get_snp_data(["SPY"], dates))
 
     result_allocates = fit_line(df_data, reverse_sr)
-    utils.print_allocations(result_allocates, tickers)
+    utils.print_allocations(result_allocates, df_data.columns)
 
     portfolio = utils.portfolio_val(df_data, result_allocates)
     market = market.join(portfolio)
