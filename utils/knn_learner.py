@@ -1,5 +1,6 @@
 import scipy.stats as sps
 
+
 class KNNLearner:
     def __init__(self, k):
         self.k = k

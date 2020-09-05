@@ -6,12 +6,15 @@ import matplotlib.pyplot as plt
 import scipy.optimize as spo
 import utils
 
+
 def reverse_sr(allocates, df):
     return utils.sharpe_ratio(utils.portfolio_val(df, allocates),
-                              utils.daily_free_risk()) * -1;
+                              utils.daily_free_risk()) * -1
+
 
 def sum_one(allocates):
     return np.sum(allocates) - 1.0
+
 
 def fit_line(df, error_func):
     column_num = df.shape[1]
@@ -20,14 +23,15 @@ def fit_line(df, error_func):
     for x in range(column_num):
         limits += ((0.0, 1.0),)
 
-    constr = {'type':'eq', 'fun':sum_one}
+    constr = {'type': 'eq', 'fun': sum_one}
 
     result = spo.minimize(error_func, init_allocates, args=(df,),
                           method='SLSQP', bounds=limits,
                           constraints=constr, options={'disp': True})
     return result.x
 
-def optimize( tickers, start, end ):
+
+def optimize(tickers, start, end):
     dates = pd.date_range(start, end)
     df_data = utils.get_snp_data(tickers, dates)
     utils.fill_missing_values(df_data)
@@ -47,6 +51,7 @@ def optimize( tickers, start, end ):
 
     utils.plot_data(market)
 
+
 def run():
     parser = argparse.ArgumentParser(description='Create optimal portfolio.')
     parser.add_argument('tickers', metavar='T', type=str, nargs='+',
@@ -57,8 +62,8 @@ def run():
                         help="Evaluation end date")
     args = parser.parse_args()
 
-    optimize( args.tickers, args.start, args.end )
+    optimize(args.tickers, args.start, args.end)
+
 
 if __name__ == "__main__":
     run()
-

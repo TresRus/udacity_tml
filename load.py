@@ -3,6 +3,7 @@ import argparse
 from pandas_datareader import data as pdr
 import yfinance as yf
 
+
 def load_ticker(ticker, dataDir):
     csv = os.path.join(dataDir, "%s.csv" % ticker)
     print "Download %s to %s" % (ticker, csv)
@@ -14,20 +15,24 @@ def load_ticker(ticker, dataDir):
     if not data.empty:
         data.to_csv(csv)
 
+
 def load_tickers(tickers):
     rootDir = os.path.dirname(os.path.realpath(__file__))
-    dataDir = os.path.join( rootDir, "data" )
+    dataDir = os.path.join(rootDir, "data")
 
     for ticker in tickers:
-        load_ticker( ticker, dataDir )
+        load_ticker(ticker, dataDir)
+
 
 def run():
-    parser = argparse.ArgumentParser(description='Download historic data from yahoo finance.')
+    parser = argparse.ArgumentParser(
+        description='Download historic data from yahoo finance.')
     parser.add_argument('tickers', metavar='T', type=str, nargs='+',
                         help='ticker to download')
     args = parser.parse_args()
 
     load_tickers(tickers)
+
 
 if __name__ == "__main__":
     run()

@@ -70,6 +70,7 @@ def load_top100(save_html=False):
     with open('top100.json', 'w') as jf:
         json.dump(res, jf)
 
+
 def run():
     load_top100()
     load_currencies = json.load(open('top100.json'))

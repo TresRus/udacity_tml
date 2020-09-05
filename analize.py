@@ -19,29 +19,30 @@ class SuperEnsembleLerner:
     def __init__(self):
         self.learners = ()
         # ok
-        self.learners = self.learners + (GradientBoostingRegressor(learning_rate=0.1, n_estimators=100),)
+        self.learners = self.learners + \
+            (GradientBoostingRegressor(learning_rate=0.1, n_estimators=100),)
 
         # ok
         #self.learners = self.learners + (RandomForestRegressor(n_estimators=100),)
 
         # so so
-        #self.learners = self.learners + \
+        # self.learners = self.learners + \
         #    (AdaBoostRegressor(base_estimator=MLPRegressor(hidden_layer_sizes=(80, 30,)), n_estimators=300),)
 
         # so so
-        #self.learners = self.learners + \
+        # self.learners = self.learners + \
         #    (AdaBoostRegressor(base_estimator=LinearRegression(), n_estimators=100),)
 
         # bad
-        #self.learners = self.learners + \
+        # self.learners = self.learners + \
         #    (AdaBoostRegressor(base_estimator=SVR(degree=10)),)
 
         # bad
-        #self.learners = self.learners + \
+        # self.learners = self.learners + \
         #    (AdaBoostRegressor(base_estimator=DecisionTreeRegressor()),)
 
         # ?
-        #self.learners = self.learners + \
+        # self.learners = self.learners + \
         #    (AdaBoostRegressor(base_estimator=KNeighborsRegressor()),)
 
     def fit(self, X, y):
@@ -75,23 +76,27 @@ def plot_info(name, df, window):
     rsi = 100 - 100 / (1 + rs)
 
     r1 = df.join(
-            ma,
-            rsuffix='_moving_avg').join(
-                ubb,
-                rsuffix='_upper_bb').join(
-                    lbb,
-                    rsuffix='_lower_bb')
+        ma,
+        rsuffix='_moving_avg').join(
+        ubb,
+        rsuffix='_upper_bb').join(
+        lbb,
+        rsuffix='_lower_bb')
     r2 = df.join(
-            mah,
-            rsuffix='_moving_avg_h').join(
-            maq,
-            rsuffix='_moving_avg_q')
+        mah,
+        rsuffix='_moving_avg_h').join(
+        maq,
+        rsuffix='_moving_avg_q')
     r3 = emad.join(
-            macd,
-            rsuffix='_macd')
+        macd,
+        rsuffix='_macd')
     r4 = rsi
     plot_num = window * 2
-    utils.plot_to_pdf(name, (r1[-plot_num:], r2[-plot_num:], r3[-plot_num:], r4[-plot_num:]))
+    utils.plot_to_pdf(name,
+                      (r1[-plot_num:],
+                       r2[-plot_num:],
+                          r3[-plot_num:],
+                          r4[-plot_num:]))
 
 
 def prepare_input(df, window, predict):
@@ -111,14 +116,14 @@ def prepare_input(df, window, predict):
     rs = utils.compute_reletive_strength(df, window)
 
     res = momentum.join(
-            ma_hist,
-            rsuffix='_moving_avg_hist').join(
-                ms,
-                rsuffix='_moving_std').join(
-                macd_hist,
-                rsuffix='_macd_hist').join(
-                rs,
-                rsuffix="_rs")
+        ma_hist,
+        rsuffix='_moving_avg_hist').join(
+        ms,
+        rsuffix='_moving_std').join(
+        macd_hist,
+        rsuffix='_macd_hist').join(
+        rs,
+        rsuffix="_rs")
     res = res[window:-predict]
     utils.plot_data(res)
     res = (res - res.mean()) / res.std()
@@ -130,11 +135,16 @@ def prepare_output(df, window, predict):
     pred = utils.compute_prediction(df, predict)
     return pred[window:-predict]
 
+
 def get_market_data(dates):
     load_currencies = json.load(open('top100.json'))
     load_params = ['Close', 'Market Cap']
 
-    all_data = utils.get_data(load_currencies.keys(), load_params, dates, 'cc_data')
+    all_data = utils.get_data(
+        load_currencies.keys(),
+        load_params,
+        dates,
+        'cc_data')
     for _, stock in all_data.iteritems():
         utils.fill_missing_values(stock)
 
@@ -144,8 +154,18 @@ def get_market_data(dates):
     price = all_data['Close'] * mc
     return price.sum(axis=1).to_frame(name='Market')
 
+
 def main():
-    analize_currencies = ['ETH', 'XRP', 'NEO', 'XVG', 'GNT', 'XRB', 'ADA', 'XEM', 'XMR']
+    analize_currencies = [
+        'ETH',
+        'XRP',
+        'NEO',
+        'XVG',
+        'GNT',
+        'XRB',
+        'ADA',
+        'XEM',
+        'XMR']
     # analize_currencies = json.load(open('top100.json'))
     analize_params = ['Close']
 

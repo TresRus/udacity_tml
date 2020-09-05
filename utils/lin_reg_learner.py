@@ -1,5 +1,6 @@
 import scipy.stats as sps
 
+
 class LinRegLearner:
     def __init__(self):
         pass
