@@ -1,6 +1,5 @@
 import os
 import argparse
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import utils
@@ -8,17 +7,15 @@ import utils
 
 def optimize(tickers, start, end):
     dates = pd.date_range(start, end)
-    md = utils.MarketData(dates)
-    ac_data = md.param("Adj Close")
+    md = utils.data.Market(dates, utils.data.CsvReader())
+    ac_data = md.column(utils.data.Column.Name.ADJCLOSE)
 
-    ac_data.add_snp_baseline()
-    ac_data.add_tickers(tickers)
+    ac_data.load_snp_baseline()
+    ac_data.load_tickers(tickers)
     ac_data.fill_missing_values()
 
     norm = ac_data.normalize()
     utils.print_statistic(norm, utils.daily_free_risk())
-
-    print norm.head()
 
     market = norm[['SPY']]
 

@@ -2,95 +2,16 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
-import scipy.optimize as spo
 import os
 import math
 import utils
-import datetime
 import argparse
+import datetime
 
 
 def symbol_to_path(symbol, base_dir="data", ext="csv"):
     """Return CSV file path given ticker symbol."""
     return os.path.join(base_dir, "{}.{}".format(str(symbol), str(ext)))
-
-
-class MarketDataParam(object):
-    def __init__(self, dates, param, data_dir="data"):
-        self.data_dir = data_dir
-        self.param = param
-        self.df = pd.DataFrame(index=dates)
-
-    def add_snp_baseline(self):
-        # SPY is S&P500 ETF and is used as reference stock.
-        # It should be always added to dataframe.
-        self.add_ticker("SPY")
-        # SPY is traded on every day that exchange is open.
-        # All the missing dates are not interesting for calculations.
-        self.df = self.df.dropna(subset=["SPY"])
-
-    def add_ticker(self, ticker):
-        if ticker in self.df.columns:
-            return
-
-        file_path = symbol_to_path(ticker, self.data_dir)
-        df_temp = pd.read_csv(file_path, parse_dates=True, index_col="Date",
-                              usecols=["Date", self.param], na_values=["nan"])
-        df_temp = df_temp.rename(columns={self.param: ticker})
-        self.df = self.df.join(df_temp)
-
-    def add_tickers(self, tickers):
-        for ticker in tickers:
-            self.add_ticker(ticker)
-
-    def fill_missing_values(self):
-        """Fill missing values in data frame, in place."""
-        self.df.fillna(method='ffill', inplace=True)
-        self.df.fillna(method='bfill', inplace=True)
-
-    def normalize(self):
-        """Normalize data by first row"""
-        return self.df / self.df.ix[0]
-
-    def portfolio_val(self, allocates, cost=1.0):
-        port = self.normalize() * allocates
-        port = port * cost
-
-        dr = port.sum(axis=1)
-        dr.name = "Portfolio"
-        return dr.to_frame()
-
-    def fit_line(self, error_func):
-        column_num = self.df.shape[1]
-        init_allocates = np.ones(column_num) / column_num
-        limits = ()
-        for x in range(column_num):
-            limits += ((0.0, 1.0),)
-
-        constr = {'type': 'eq', 'fun': sum_one}
-
-        result = spo.minimize(error_func, init_allocates, args=(self,),
-                              method='SLSQP', bounds=limits,
-                              constraints=constr, options={'disp': True})
-        return result.x
-
-
-class MarketData(object):
-    def __init__(self, dates, data_dir="data"):
-        self.data_dir = data_dir
-        self.dates = dates
-        self.data = {}
-
-    def param(self, name):
-        if name not in self.data:
-            self.data[name] = MarketDataParam(self.dates, name, self.data_dir)
-
-        return self.data[name]
-
-    def get_data(self, tickers, params):
-        for param in params:
-            param_data = self.param(param)
-            param_data = self.add_tickers(tickers)
 
 
 def compute_daily_returns(df):
@@ -162,10 +83,6 @@ def daily_free_risk():
 def reverse_sr(allocates, mdp):
     return utils.sharpe_ratio(mdp.portfolio_val(allocates),
                               daily_free_risk()) * -1
-
-
-def sum_one(allocates):
-    return np.sum(allocates) - 1.0
 
 
 def print_statistic(df, daily_free_risk):

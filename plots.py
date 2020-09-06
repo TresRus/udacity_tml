@@ -8,10 +8,10 @@ import utils
 
 def plot_tickers(tickers, start, end):
     dates = pd.date_range(start, end)
-    md = utils.MarketData(dates)
-    ac_data = md.param("Adj Close")
+    md = utils.data.Market(dates, utils.data.CsvReader())
+    ac_data = md.column(utils.data.Column.Name.ADJCLOSE)
 
-    ac_data.add_tickers(tickers)
+    ac_data.load_tickers(tickers)
     ac_data.fill_missing_values()
 
     utils.plot_data(ac_data.normalize())
