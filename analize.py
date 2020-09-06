@@ -1,9 +1,9 @@
+import argparse
 import datetime
 import pandas as pd
 import numpy as np
 import scipy.optimize as spo
 import utils
-import json
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import AdaBoostRegressor
@@ -15,39 +15,46 @@ from sklearn.linear_model import LinearRegression
 
 
 class SuperEnsembleLerner:
-    def __init__(self):
+    def __init__(self, gbr=False, rfr=False, mlpr=False, lr=False, svr=False, dtr=False, knr=False):
         self.learners = ()
         # ok
-        self.learners = self.learners + \
-            (GradientBoostingRegressor(learning_rate=0.1, n_estimators=100),)
+        if gbr:
+            self.learners = self.learners + \
+                (GradientBoostingRegressor(learning_rate=0.1, n_estimators=100),)
 
         # ok
-        #self.learners = self.learners + (RandomForestRegressor(n_estimators=100),)
+        if rfr:
+            self.learners = self.learners + (RandomForestRegressor(n_estimators=100),)
 
         # so so
-        # self.learners = self.learners + \
-        #    (AdaBoostRegressor(base_estimator=MLPRegressor(hidden_layer_sizes=(80, 30,)), n_estimators=300),)
+        if mlpr:
+            self.learners = self.learners + \
+                (AdaBoostRegressor(base_estimator=MLPRegressor(hidden_layer_sizes=(80, 30,)), n_estimators=300),)
 
         # so so
-        # self.learners = self.learners + \
-        #    (AdaBoostRegressor(base_estimator=LinearRegression(), n_estimators=100),)
+        if lr:
+            self.learners = self.learners + \
+                (AdaBoostRegressor(base_estimator=LinearRegression(), n_estimators=100),)
 
         # bad
-        # self.learners = self.learners + \
-        #    (AdaBoostRegressor(base_estimator=SVR(degree=10)),)
+        if svr:
+            self.learners = self.learners + \
+                (AdaBoostRegressor(base_estimator=SVR(degree=10)),)
 
         # bad
-        # self.learners = self.learners + \
-        #    (AdaBoostRegressor(base_estimator=DecisionTreeRegressor()),)
+        if dtr:
+            self.learners = self.learners + \
+                (AdaBoostRegressor(base_estimator=DecisionTreeRegressor()),)
 
         # ?
-        # self.learners = self.learners + \
-        #    (AdaBoostRegressor(base_estimator=KNeighborsRegressor()),)
+        if knr:
+            self.learners = self.learners + \
+                (AdaBoostRegressor(base_estimator=KNeighborsRegressor()),)
 
     def fit(self, X, y):
         for learner in self.learners:
             learner.fit(X, y)
-            print learner.feature_importances_
+            # print learner.feature_importances_
 
     def predict(self, X):
         pred = ()
@@ -92,10 +99,10 @@ def plot_info(name, df, window):
     r4 = rsi
     plot_num = window * 2
     utils.plot_to_pdf(name,
-                      (r1[-plot_num:],
-                       r2[-plot_num:],
-                          r3[-plot_num:],
-                          r4[-plot_num:]))
+                      [ ("Average+boundries", r1[-plot_num:]),
+                        ("Averages", r2[-plot_num:],),
+                        ("MACD", r3[-plot_num:]),
+                        ("RSI", r4[-plot_num:]) ])
 
 
 def prepare_input(df, window, predict):
@@ -124,9 +131,9 @@ def prepare_input(df, window, predict):
         rs,
         rsuffix="_rs")
     res = res[window:-predict]
-    utils.plot_data(res)
+    # utils.plot_data(res)
     res = (res - res.mean()) / res.std()
-    utils.plot_data(res)
+    # utils.plot_data(res)
     return res
 
 
@@ -154,74 +161,63 @@ def get_market_data(dates):
     return price.sum(axis=1).to_frame(name='Market')
 
 
-def main():
-    analize_currencies = [
-        'ETH',
-        'XRP',
-        'NEO',
-        'XVG',
-        'GNT',
-        'XRB',
-        'ADA',
-        'XEM',
-        'XMR']
-    # analize_currencies = json.load(open('top100.json'))
-    analize_params = ['Close']
+def analize(tickers, start, end, window, predict, test_size):
+    dates = pd.date_range(start, end)
+    md = utils.data.Market(dates, utils.data.CsvReader())
+    md.load(tickers, [utils.data.Column.Name.ADJCLOSE])
+    ac_data = md.column(utils.data.Column.Name.ADJCLOSE)
 
-    horizon = 300
-    learn_pool = 250
-    window = 30
-    predict = 7
+    ac_data.load_snp_baseline()
+    ac_data.load_tickers(tickers)
+    ac_data.fill_missing_values()
 
-    data_start = datetime.date(2009, 1, 1)
-    data_end = datetime.datetime.now() - datetime.timedelta(days=1)
+    for ticker in tickers:
+        df = ac_data.df[[ticker]]
+        plot_info(ticker, df, window)
 
-    df_start = data_end - datetime.timedelta(days=horizon)
-    df_end = data_end
+        learn_pool = df.shape[0] - window - predict - test_size
 
-    dates = pd.date_range(
-        df_start.strftime('%Y-%m-%d'),
-        df_end.strftime('%Y-%m-%d'))
+        res = []
+        for name, learner in [
+                               ("rfr+dtr+knr", SuperEnsembleLerner(rfr=True, dtr=True, knr=True)),
+                               ("gbr+rfr+dtr", SuperEnsembleLerner(gbr=True, rfr=True, dtr=True)),
+                               ]:
+            X = prepare_input(df, window, predict)
+            Y = prepare_output(df, window, predict)
+            X_learn = X[:learn_pool + 1]
+            Y_learn = Y[:learn_pool + 1]
+            X_test = X[learn_pool:]
+            Y_test = Y[learn_pool:]
+            learner.fit(X_learn, Y_learn)
+            test_pred = learner.predict(X_test)
+            Y_test["%s_pred-test" % (ticker)] = test_pred
+            Y_test = Y_test.rename(columns={ ticker: "%s-test" % (ticker) })
+            learn_pred = learner.predict(X_learn)
+            Y_learn["%s_pred" % (ticker)] = learn_pred
 
-    market = get_market_data(dates)
-    n_market = utils.normalize(market)
+            res += [ (name, pd.concat([Y_learn, Y_test])[-(window+predict+test_size):]) ]
+        utils.plot_to_pdf(ticker, res)
 
-    md = utils.MarketData(dates, data_dir='cc_data')
-    md.get_data(analize_currencies, analize_params)
-    for _, stock in md.data.iteritems():
-        stock.fill_missing_values()
-    stocks = md.data['Close']
-    n_stocks = stocks.normalize()
 
-    """
-    full = stocks.join(market)
-    n_full = utils.normalize(full[:window])
-    utils.plot_data(n_full)
-    utils.plot_data(utils.compute_daily_returns(n_full))
-    """
 
-    for name in analize_currencies:
-        plot_info(name, stocks[[name]], window)
+def run():
+    parser = argparse.ArgumentParser(description='Create optimal portfolio.')
+    parser.add_argument('tickers', metavar='T', type=str, nargs='+',
+                        help='ticker to include in portfolio')
+    parser.add_argument('-s', '--start', required=True, type=utils.date_arg,
+                        help="Evaluation start date")
+    parser.add_argument('-e', '--end', required=True, type=utils.date_arg,
+                        help="Evaluation end date")
+    parser.add_argument('-w', '--window', required=True, type=int,
+                        help="Window size")
+    parser.add_argument('-p', '--predict', required=True, type=int,
+                        help="Prediction input size")
+    parser.add_argument('-t', '--test', required=True, type=int,
+                        help="Test data size")
+    args = parser.parse_args()
 
-        """
-        X = prepare_input(stocks[[name]], window, predict)
-        Y = prepare_output(stocks[[name]], window, predict)
-        X_learn = X[:learn_pool + 1]
-        Y_learn = Y[:learn_pool + 1]
-        X_test = X[learn_pool:]
-        Y_test = Y[learn_pool:]
-        learner = SuperEnsembleLerner()
-        learner.fit(X_learn, Y_learn)
-        test_pred = learner.predict(X_test)
-        Y_test["%s_pred-test" % (name)] = test_pred
-        Y_test = Y_test.rename(columns={ name: "%s-test" % (name) })
-        learn_pred = learner.predict(X_learn)
-        Y_learn["%s_pred" % (name)] = learn_pred
-
-        res = pd.concat([Y_learn, Y_test])
-        utils.plot_data(res)
-        """
+    analize(args.tickers, args.start, args.end, args.window, args.predict, args.test)
 
 
 if __name__ == "__main__":
-    main()
+    run()
