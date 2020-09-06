@@ -114,14 +114,13 @@ def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Price"):
 def plot_to_pdf(
         name,
         dfs,
-        title="Stock prices",
         xlabel="Date",
         ylabel="Price"):
     if not os.path.exists('plots'):
         os.makedirs('plots')
     with PdfPages(symbol_to_path(name, 'plots', 'pdf')) as pdf:
-        for df in dfs:
-            ax = df.plot(title=title, fontsize=8)
+        for name, df in dfs:
+            ax = df.plot(title=name, fontsize=8)
             ax.set_xlabel(xlabel)
             ax.set_ylabel(ylabel)
             pdf.savefig()
