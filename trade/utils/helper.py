@@ -4,7 +4,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import os
 import math
-import utils
 import argparse
 import datetime
 
@@ -81,8 +80,8 @@ def daily_free_risk():
 
 
 def reverse_sr(allocates, mdp):
-    return utils.sharpe_ratio(mdp.portfolio_val(allocates),
-                              daily_free_risk()) * -1
+    return sharpe_ratio(mdp.portfolio_val(allocates),
+                        daily_free_risk()) * -1
 
 
 def print_statistic(df, daily_free_risk):

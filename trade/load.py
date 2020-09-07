@@ -17,11 +17,11 @@ def load_ticker(ticker, dataDir):
 
 
 def load_tickers(tickers):
-    rootDir = os.path.dirname(os.path.realpath(__file__))
-    dataDir = os.path.join(rootDir, "data")
+    root_dir = os.path.dirname(os.path.realpath(__file__))
+    data_dir = os.path.join(root_dir, "data")
 
     for ticker in tickers:
-        load_ticker(ticker, dataDir)
+        load_ticker(ticker, data_dir)
 
 
 def run():
