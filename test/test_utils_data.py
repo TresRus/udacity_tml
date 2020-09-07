@@ -2,7 +2,8 @@ import unittest
 import os
 import datetime
 import pandas as pd
-from trade.utils.data import (CsvReader, Stock, Column)
+from trade.data.storage import (Stock, Column)
+from trade.data.reader import (CsvReader)
 
 
 class TestMarket(unittest.TestCase):
