@@ -13,6 +13,20 @@ class Reader(object):
     def read(self, ticker, columns):
         raise NotImplementedError
 
+    def read_column(self, tickers, column):
+        c = Column(column)
+        for ticker in tickers:
+            df_temp = self.read(ticker, [column])
+            df_temp = df_temp.rename(columns={column: ticker})
+            c.df = c.df.join(df_temp, how="outer")
+        return c
+
+    def read_stock(self, tickers, columns):
+        s = Stock()
+        for column in columns:
+            s.data[column] = self.read_column(tickers, column)
+        return s
+
 
 class CsvReader(Reader):
     def __init__(self, root="data"):
@@ -44,36 +58,22 @@ class Column(object):
         OPEN = "Open"
         VOLUME = "Volume"
 
-    def __init__(self, column, reader):
-        self.reader = reader
+    def __init__(self, column):
         self.column = column
         self.df = pd.DataFrame()
 
     def get_date_range(self, dates):
-        c = Column(self.column, self.reader)
+        c = Column(self.column)
         c.df = pd.DataFrame(index=dates)
         c.df = c.df.join(self.df, how="inner")
         return c
 
     def set_baseline(self, ticker):
-        # SPY is S&P500 ETF and is used as reference stock.
-        # It should be always added to dataframe.
-        self.load_ticker(ticker)
-        # SPY is traded on every day that exchange is open.
+        if ticker not in self.df.columns:
+            raise ValueError( "No {} ticker in {} column".format(ticker, self.column) )
+
         # All the missing dates are not interesting for calculations.
         self.df = self.df.dropna(subset=[ticker])
-
-    def load_ticker(self, ticker):
-        if ticker in self.df.columns:
-            return
-
-        df_temp = self.reader.read(ticker, [self.column])
-        df_temp = df_temp.rename(columns={self.column: ticker})
-        self.df = self.df.join(df_temp, how="outer")
-
-    def load_tickers(self, tickers):
-        for ticker in tickers:
-            self.load_ticker(ticker)
 
     def fill_missing_values(self):
         """Fill missing values in data frame, in place."""
@@ -107,27 +107,21 @@ class Column(object):
         return result.x
 
 
-class Market(object):
-    def __init__(self, reader):
-        self.reader = reader
+class Stock(object):
+    def __init__(self):
         self.data = {}
 
     def column(self, name):
         if name not in self.data:
-            self.data[name] = Column(name, self.reader)
+            self.data[name] = Column(name)
 
         return self.data[name]
 
     def get_date_range(self, dates):
-        m = Market(self.reader)
+        m = Stock()
         for name, column in self.data.iteritems():
             m.data[name] = column.get_date_range(dates)
         return m
-
-    def load(self, tickers, columns):
-        for column in columns:
-            cd = self.column(column)
-            cd.load_tickers(tickers)
 
     def set_baseline(self, ticker):
         for _, column in self.data.iteritems():

@@ -7,14 +7,14 @@ import utils
 
 
 def plot_tickers(tickers, start, end):
-    m = utils.data.Market(utils.data.CsvReader())
-    m.load(tickers, [utils.data.Column.Name.ADJCLOSE])
-    m.fill_missing_values()
+    reader = utils.data.CsvReader()
+    stock = reader.read_stock(tickers, [utils.data.Column.Name.ADJCLOSE])
+    stock.fill_missing_values()
     
     dates = pd.date_range(start, end)
-    dates_m = m.get_date_range(dates)
+    stock_range = stock.get_date_range(dates)
 
-    ac_data = dates_m.column(utils.data.Column.Name.ADJCLOSE)
+    ac_data = stock_range.column(utils.data.Column.Name.ADJCLOSE)
     utils.plot_data(ac_data.normalize())
 
     # daily_returns = utils.compute_daily_returns(ac_data.df)
