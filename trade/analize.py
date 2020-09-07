@@ -162,10 +162,12 @@ def get_market_data(dates):
 
 
 def analize(tickers, start, end, window, predict, test_size):
-    dates = pd.date_range(start, end)
     md = utils.data.Market(dates, utils.data.CsvReader())
     md.load(tickers, [utils.data.Column.Name.ADJCLOSE])
-    ac_data = md.column(utils.data.Column.Name.ADJCLOSE)
+
+    dates = pd.date_range(start, end)
+    dates_m = md.get_date_range(dates)
+    ac_data = dates_m.column(utils.data.Column.Name.ADJCLOSE)
 
     ac_data.load_snp_baseline()
     ac_data.load_tickers(tickers)

@@ -50,9 +50,10 @@ class Column(object):
         self.df = pd.DataFrame()
 
     def get_date_range(self, dates):
-        df = pd.DataFrame(index=dates)
-        df = df.join(self.df, how="inner")
-        return df
+        c = Column(self.column, self.reader)
+        c.df = pd.DataFrame(index=dates)
+        c.df = c.df.join(self.df, how="inner")
+        return c
 
     def set_baseline(self, ticker):
         # SPY is S&P500 ETF and is used as reference stock.
@@ -117,6 +118,12 @@ class Market(object):
 
         return self.data[name]
 
+    def get_date_range(self, dates):
+        m = Market(self.reader)
+        for name, column in self.data.iteritems():
+            m.data[name] = column.get_date_range(dates)
+        return m
+
     def load(self, tickers, columns):
         for column in columns:
             cd = self.column(column)
@@ -129,3 +136,4 @@ class Market(object):
     def fill_missing_values(self):
         for _, column in self.data.iteritems():
             column.fill_missing_values()
+
