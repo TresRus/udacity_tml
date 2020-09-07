@@ -45,6 +45,20 @@ class TestMarket(unittest.TestCase):
         self.assertEqual(
             m.data[Column.Name.ADJCLOSE].df.isnull().sum().sum(), 0)
 
+    def test_get_date_range(self):
+        m = Market(CsvReader(self.data_dir))
+        m.load(["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
+        start = "2020-07-01"
+        end = "2020-09-01"
+        dates = pd.date_range(start, end)
+        nm = m.get_date_range(dates)
+        self.assertEqual(nm.data[Column.Name.ADJCLOSE].df.shape[0], 44)
+        self.assertEqual(
+            nm.data[Column.Name.ADJCLOSE].df.index[0],
+            datetime.datetime.strptime(
+                "2020-07-01",
+                "%Y-%m-%d"))
+
 
 class TestColumn(unittest.TestCase):
     def setUp(self):
@@ -69,10 +83,10 @@ class TestColumn(unittest.TestCase):
         start = "2020-07-01"
         end = "2020-09-01"
         dates = pd.date_range(start, end)
-        df = column.get_date_range(dates)
-        self.assertEqual(df.shape[0], 44)
+        c = column.get_date_range(dates)
+        self.assertEqual(c.df.shape[0], 44)
         self.assertEqual(
-            df.index[0],
+            c.df.index[0],
             datetime.datetime.strptime(
                 "2020-07-01",
                 "%Y-%m-%d"))

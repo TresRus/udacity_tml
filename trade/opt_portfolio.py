@@ -6,13 +6,15 @@ import utils
 
 
 def optimize(tickers, baseline, start, end):
-    dates = pd.date_range(start, end)
     m = utils.data.Market(utils.data.CsvReader())
     m.load(tickers, [utils.data.Column.Name.ADJCLOSE])
     m.set_baseline(baseline)
     m.fill_missing_values()
+    
+    dates = pd.date_range(start, end)
+    dates_m = m.get_date_range(dates)
 
-    ac_data = m.column(utils.data.Column.Name.ADJCLOSE)
+    ac_data = dates_m.column(utils.data.Column.Name.ADJCLOSE)
     norm = ac_data.normalize()
     utils.print_statistic(norm, utils.daily_free_risk())
 
