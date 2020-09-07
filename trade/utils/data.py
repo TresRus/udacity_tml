@@ -44,18 +44,23 @@ class Column(object):
         OPEN = "Open"
         VOLUME = "Volume"
 
-    def __init__(self, dates, column, reader):
+    def __init__(self, column, reader):
         self.reader = reader
         self.column = column
-        self.df = pd.DataFrame(index=dates)
+        self.df = pd.DataFrame()
 
-    def load_snp_baseline(self):
+    def get_date_range(self, dates):
+        df = pd.DataFrame(index=dates)
+        df = df.join(self.df, how="inner")
+        return df
+
+    def set_baseline(self, ticker):
         # SPY is S&P500 ETF and is used as reference stock.
         # It should be always added to dataframe.
-        self.load_ticker("SPY")
+        self.load_ticker(ticker)
         # SPY is traded on every day that exchange is open.
         # All the missing dates are not interesting for calculations.
-        self.df = self.df.dropna(subset=["SPY"])
+        self.df = self.df.dropna(subset=[ticker])
 
     def load_ticker(self, ticker):
         if ticker in self.df.columns:
@@ -63,7 +68,7 @@ class Column(object):
 
         df_temp = self.reader.read(ticker, [self.column])
         df_temp = df_temp.rename(columns={self.column: ticker})
-        self.df = self.df.join(df_temp)
+        self.df = self.df.join(df_temp, how="outer")
 
     def load_tickers(self, tickers):
         for ticker in tickers:
@@ -102,14 +107,13 @@ class Column(object):
 
 
 class Market(object):
-    def __init__(self, dates, reader):
+    def __init__(self, reader):
         self.reader = reader
-        self.dates = dates
         self.data = {}
 
     def column(self, name):
         if name not in self.data:
-            self.data[name] = Column(self.dates, name, self.reader)
+            self.data[name] = Column(name, self.reader)
 
         return self.data[name]
 
@@ -117,3 +121,11 @@ class Market(object):
         for column in columns:
             cd = self.column(column)
             cd.load_tickers(tickers)
+
+    def set_baseline(self, ticker):
+        for _, column in self.data.iteritems():
+            column.set_baseline(ticker)
+
+    def fill_missing_values(self):
+        for _, column in self.data.iteritems():
+            column.fill_missing_values()

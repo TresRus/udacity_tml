@@ -173,7 +173,7 @@ def analize(tickers, start, end, window, predict, test_size):
 
     for ticker in tickers:
         df = ac_data.df[[ticker]]
-        plot_info(ticker, df, window)
+        plot_info(ticker, df, predict)
 
         learn_pool = df.shape[0] - window - predict - test_size
 
@@ -196,7 +196,7 @@ def analize(tickers, start, end, window, predict, test_size):
             Y_learn["%s_pred" % (ticker)] = learn_pred
 
             res += [ (name, pd.concat([Y_learn, Y_test])[-(window+predict+test_size):]) ]
-        utils.plot_to_pdf(ticker, res)
+        # utils.plot_to_pdf(ticker, res)
 
 
 
