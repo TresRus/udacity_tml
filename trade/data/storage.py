@@ -23,11 +23,6 @@ class Column(object):
         self.name = name
         self.df = pd.DataFrame()
 
-    def fill_missing_values(self):
-        """Fill missing values in data frame, in place."""
-        self.df.fillna(method='ffill', inplace=True)
-        self.df.fillna(method='bfill', inplace=True)
-
     def normalize(self):
         """Normalize data by first row"""
         return self.df / self.df.ix[0]
@@ -64,8 +59,3 @@ class Stock(object):
             self.data[name] = Column(name)
 
         return self.data[name]
-
-    def fill_missing_values(self):
-        for _, column in self.data.iteritems():
-            column.fill_missing_values()
-
