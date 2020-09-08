@@ -3,19 +3,16 @@ import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import utils
+from trade import utils
+from trade.data import (storage, reader, process)
 
 
 def plot_tickers(tickers, start, end):
-    reader = utils.data.CsvReader()
-    stock = reader.read_stock(tickers, [utils.data.Column.Name.ADJCLOSE])
-    stock.fill_missing_values()
-    
     dates = pd.date_range(start, end)
-    stock_range = stock.get_date_range(dates)
+    stock = process.ProcessLine([process.FillMissing(), process.Range(dates)]).process(
+        reader.CsvReader().read_stock(tickers, [storage.Column.Name.ADJCLOSE]))
 
-    ac_data = stock_range.column(utils.data.Column.Name.ADJCLOSE)
-    utils.plot_data(ac_data.normalize())
+    utils.plot_data(stock.column(storage.Column.Name.ADJCLOSE).normalize())
 
     # daily_returns = utils.compute_daily_returns(ac_data.df)
     # unitls.plot_data(daily_returns, title="Daily returns", ylabel="Daily returns")
