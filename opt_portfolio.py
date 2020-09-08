@@ -11,8 +11,8 @@ def optimize(tickers, baseline, start, end):
         tickers += [baseline]
 
     dates = pd.date_range(start, end)
-    stock = process.ProcessLine([process.Baseline(baseline), process.FillMissing(), process.Range(dates)]).process(
-        reader.CsvReader().read_stock(tickers, [storage.Column.Name.ADJCLOSE]))
+    stock = process.ProcessLine([process.Baseline(baseline), process.FillMissing(), process.Range(
+        dates)]).process(reader.CsvReader().read_stock(tickers, [storage.Column.Name.ADJCLOSE]))
 
     ac_data = stock.column(storage.Column.Name.ADJCLOSE)
     norm = ac_data.normalize()

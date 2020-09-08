@@ -1,5 +1,6 @@
 from trade.data import storage
 
+
 class ColumnBase(object):
     def process_column(self, column):
         raise NotImplementedError
