@@ -26,11 +26,6 @@ class TestMarket(unittest.TestCase):
         stock = self.reader.read_stock(["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
         self.assertEqual(stock.column(Column.Name.ADJCLOSE).df.shape[0], 70)
 
-    def test_baseline(self):
-        stock = self.reader.read_stock(["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
-        stock.set_baseline("SPY")
-        self.assertEqual(stock.column(Column.Name.ADJCLOSE).df.shape[0], 50)
-
     def test_fill(self):
         stock = self.reader.read_stock(["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
         self.assertEqual(
@@ -61,11 +56,6 @@ class TestColumn(unittest.TestCase):
     def test_read_all(self):
         column = self.reader.read_column(["SPY", "GOOG", "GLD"], Column.Name.ADJCLOSE)
         self.assertEqual(column.df.shape[0], 70)
-
-    def test_baseline(self):
-        column = self.reader.read_column(["SPY", "GOOG", "GLD"], Column.Name.ADJCLOSE)
-        column.set_baseline("SPY")
-        self.assertEqual(column.df.shape[0], 50)
 
     def test_fill(self):
         column = self.reader.read_column(["SPY", "GOOG", "GLD"], Column.Name.ADJCLOSE)
