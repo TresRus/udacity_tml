@@ -26,14 +26,6 @@ class TestMarket(unittest.TestCase):
         stock = self.reader.read_stock(["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
         self.assertEqual(stock.column(Column.Name.ADJCLOSE).df.shape[0], 70)
 
-    def test_fill(self):
-        stock = self.reader.read_stock(["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
-        self.assertEqual(
-            stock.column(Column.Name.ADJCLOSE).df.isnull().sum().sum(), 60)
-        stock.fill_missing_values()
-        self.assertEqual(
-            stock.column(Column.Name.ADJCLOSE).df.isnull().sum().sum(), 0)
-
 
 class TestColumn(unittest.TestCase):
     def setUp(self):
@@ -57,11 +49,6 @@ class TestColumn(unittest.TestCase):
         column = self.reader.read_column(["SPY", "GOOG", "GLD"], Column.Name.ADJCLOSE)
         self.assertEqual(column.df.shape[0], 70)
 
-    def test_fill(self):
-        column = self.reader.read_column(["SPY", "GOOG", "GLD"], Column.Name.ADJCLOSE)
-        self.assertEqual(column.df.isnull().sum().sum(), 60)
-        column.fill_missing_values()
-        self.assertEqual(column.df.isnull().sum().sum(), 0)
 
 if __name__ == '__main__':
     unittest.main()
