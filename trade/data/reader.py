@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import storage
 
+
 class Reader(object):
     def read(self, ticker, columns):
         raise NotImplementedError
@@ -39,5 +40,3 @@ class CsvReader(Reader):
             index_col=storage.Column.Name.DATE,
             usecols=columns,
             na_values=["nan"])
-
-

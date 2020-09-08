@@ -1,6 +1,7 @@
 import column_base
 from trade.data import storage
 
+
 class FillMissing(column_base.ColumnBase):
     def process_column(self, column):
         result_column = storage.Column(column.name)

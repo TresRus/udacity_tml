@@ -15,7 +15,15 @@ from sklearn.linear_model import LinearRegression
 
 
 class SuperEnsembleLerner:
-    def __init__(self, gbr=False, rfr=False, mlpr=False, lr=False, svr=False, dtr=False, knr=False):
+    def __init__(
+            self,
+            gbr=False,
+            rfr=False,
+            mlpr=False,
+            lr=False,
+            svr=False,
+            dtr=False,
+            knr=False):
         self.learners = ()
         # ok
         if gbr:
@@ -24,12 +32,16 @@ class SuperEnsembleLerner:
 
         # ok
         if rfr:
-            self.learners = self.learners + (RandomForestRegressor(n_estimators=100),)
+            self.learners = self.learners + \
+                (RandomForestRegressor(n_estimators=100),)
 
         # so so
         if mlpr:
-            self.learners = self.learners + \
-                (AdaBoostRegressor(base_estimator=MLPRegressor(hidden_layer_sizes=(80, 30,)), n_estimators=300),)
+            self.learners = self.learners + (
+                AdaBoostRegressor(
+                    base_estimator=MLPRegressor(
+                        hidden_layer_sizes=(
+                            80, 30,)), n_estimators=300),)
 
         # so so
         if lr:
@@ -99,10 +111,10 @@ def plot_info(name, df, window):
     r4 = rsi
     plot_num = window * 2
     utils.plot_to_pdf(name,
-                      [ ("Average+boundries", r1[-plot_num:]),
-                        ("Averages", r2[-plot_num:],),
-                        ("MACD", r3[-plot_num:]),
-                        ("RSI", r4[-plot_num:]) ])
+                      [("Average+boundries", r1[-plot_num:]),
+                       ("Averages", r2[-plot_num:],),
+                       ("MACD", r3[-plot_num:]),
+                       ("RSI", r4[-plot_num:])])
 
 
 def prepare_input(df, window, predict):
@@ -181,9 +193,9 @@ def analize(tickers, start, end, window, predict, test_size):
 
         res = []
         for name, learner in [
-                               ("rfr+dtr+knr", SuperEnsembleLerner(rfr=True, dtr=True, knr=True)),
-                               ("gbr+rfr+dtr", SuperEnsembleLerner(gbr=True, rfr=True, dtr=True)),
-                               ]:
+            ("rfr+dtr+knr", SuperEnsembleLerner(rfr=True, dtr=True, knr=True)),
+            ("gbr+rfr+dtr", SuperEnsembleLerner(gbr=True, rfr=True, dtr=True)),
+        ]:
             X = prepare_input(df, window, predict)
             Y = prepare_output(df, window, predict)
             X_learn = X[:learn_pool + 1]
@@ -193,13 +205,13 @@ def analize(tickers, start, end, window, predict, test_size):
             learner.fit(X_learn, Y_learn)
             test_pred = learner.predict(X_test)
             Y_test["%s_pred-test" % (ticker)] = test_pred
-            Y_test = Y_test.rename(columns={ ticker: "%s-test" % (ticker) })
+            Y_test = Y_test.rename(columns={ticker: "%s-test" % (ticker)})
             learn_pred = learner.predict(X_learn)
             Y_learn["%s_pred" % (ticker)] = learn_pred
 
-            res += [ (name, pd.concat([Y_learn, Y_test])[-(window+predict+test_size):]) ]
+            res += [(name, pd.concat([Y_learn, Y_test])
+                     [-(window + predict + test_size):])]
         # utils.plot_to_pdf(ticker, res)
-
 
 
 def run():
@@ -218,7 +230,13 @@ def run():
                         help="Test data size")
     args = parser.parse_args()
 
-    analize(args.tickers, args.start, args.end, args.window, args.predict, args.test)
+    analize(
+        args.tickers,
+        args.start,
+        args.end,
+        args.window,
+        args.predict,
+        args.test)
 
 
 if __name__ == "__main__":

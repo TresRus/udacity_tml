@@ -2,6 +2,7 @@ import pandas as pd
 import column_base
 from trade.data import storage
 
+
 class Range(column_base.ColumnBase):
     def __init__(self, dates):
         self.dates = dates

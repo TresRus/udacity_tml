@@ -23,7 +23,8 @@ class TestMarket(unittest.TestCase):
         self.assertEqual(stock.column(Column.Name.ADJCLOSE).df.shape[0], 70)
 
     def test_read_all(self):
-        stock = self.reader.read_stock(["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
+        stock = self.reader.read_stock(
+            ["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
         self.assertEqual(stock.column(Column.Name.ADJCLOSE).df.shape[0], 70)
 
 
@@ -46,7 +47,8 @@ class TestColumn(unittest.TestCase):
         self.assertEqual(column.df.shape[0], 70)
 
     def test_read_all(self):
-        column = self.reader.read_column(["SPY", "GOOG", "GLD"], Column.Name.ADJCLOSE)
+        column = self.reader.read_column(
+            ["SPY", "GOOG", "GLD"], Column.Name.ADJCLOSE)
         self.assertEqual(column.df.shape[0], 70)
 
 

@@ -4,6 +4,7 @@ from trade.data.storage import (Column)
 from trade.data.reader import (CsvReader)
 from trade.data.process import (Merger)
 
+
 class TestMerger(unittest.TestCase):
     def setUp(self):
         root_dir = os.path.dirname(os.path.realpath(__file__))
@@ -24,6 +25,7 @@ class TestMerger(unittest.TestCase):
         self.assertEqual(len(stock_c.data), 2)
         self.assertEqual(stock_c.column(Column.Name.ADJCLOSE).df.shape[1], 1)
         self.assertEqual(stock_c.column(Column.Name.CLOSE).df.shape[1], 1)
+
 
 if __name__ == '__main__':
     unittest.main()
