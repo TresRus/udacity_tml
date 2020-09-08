@@ -2,22 +2,19 @@ import os
 import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
-import utils
+from trade import utils
+from trade.data import (storage, reader, process)
 
 
 def optimize(tickers, baseline, start, end):
     if baseline not in tickers:
         tickers += [baseline]
 
-    reader = utils.data.CsvReader()
-    stock = reader.read_stock(tickers, [utils.data.Column.Name.ADJCLOSE])
-    stock.set_baseline(baseline)
-    stock.fill_missing_values()
-    
     dates = pd.date_range(start, end)
-    stock_range = stock.get_date_range(dates)
+    stock = process.ProcessLine([process.Baseline(baseline), process.FillMissing(), process.Range(dates)]).process(
+        reader.CsvReader().read_stock(tickers, [storage.Column.Name.ADJCLOSE]))
 
-    ac_data = stock_range.column(utils.data.Column.Name.ADJCLOSE)
+    ac_data = stock.column(storage.Column.Name.ADJCLOSE)
     norm = ac_data.normalize()
     utils.print_statistic(norm, utils.daily_free_risk())
 
