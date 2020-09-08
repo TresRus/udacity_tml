@@ -23,13 +23,6 @@ class Column(object):
         self.name = name
         self.df = pd.DataFrame()
 
-    def set_baseline(self, ticker):
-        if ticker not in self.df.columns:
-            raise ValueError( "No {} ticker in {} column".format(ticker, self.name) )
-
-        # All the missing dates are not interesting for calculations.
-        self.df = self.df.dropna(subset=[ticker])
-
     def fill_missing_values(self):
         """Fill missing values in data frame, in place."""
         self.df.fillna(method='ffill', inplace=True)
@@ -71,10 +64,6 @@ class Stock(object):
             self.data[name] = Column(name)
 
         return self.data[name]
-
-    def set_baseline(self, ticker):
-        for _, column in self.data.iteritems():
-            column.set_baseline(ticker)
 
     def fill_missing_values(self):
         for _, column in self.data.iteritems():
