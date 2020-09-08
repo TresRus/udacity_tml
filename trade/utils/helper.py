@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.pyplot as plt
 import os
 import math
 import argparse
@@ -93,22 +91,6 @@ def print_statistic(df, daily_free_risk):
 def print_allocations(allocates, symbols):
     for x in range(len(allocates)):
         print symbols[x], " - ", allocates[x]
-
-
-def plot_to_pdf(
-        name,
-        dfs,
-        xlabel="Date",
-        ylabel="Price"):
-    if not os.path.exists('plots'):
-        os.makedirs('plots')
-    with PdfPages(symbol_to_path(name, 'plots', 'pdf')) as pdf:
-        for name, df in dfs:
-            ax = df.plot(title=name, fontsize=8)
-            ax.set_xlabel(xlabel)
-            ax.set_ylabel(ylabel)
-            pdf.savefig()
-            plt.close()
 
 
 def count_betas(df, symbols, base):

@@ -13,12 +13,20 @@ def plot_tickers(tickers, start, end):
         reader.CsvReader().read_stock(tickers, [storage.Column.Name.ADJCLOSE]))
     normalized_stock = process.Normalize().process(stock)
 
-    process.Plot().process(normalized_stock)
+    root_dir = os.path.dirname(os.path.realpath(__file__))
+    plot_dir = os.path.join(root_dir, "plots")
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
+    plot_path = os.path.join(plot_dir, "data.pdf")
+
+    process.Plot(process.plot.Graph()).process(normalized_stock)
 
     daily_return = process.DailyReturn().process(stock)
-    process.Plot(title="Daily returns", ylabel="Return").process(daily_return)
-    process.PlotHistogram().process(daily_return)
-    process.PlotScatter("SPY").process(daily_return)
+    process.PlotPdf([process.plot.Graph(title="Daily returns",
+                                        ylabel="Return"),
+                     process.plot.Histogram(),
+                     process.plot.Scatter("SPY")],
+                    plot_path).process(daily_return)
 
 
 def run():
