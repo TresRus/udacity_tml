@@ -1,7 +1,5 @@
 import unittest
 import os
-import datetime
-import pandas as pd
 from trade.data.storage import (Stock, Column)
 from trade.data.reader import (CsvReader)
 
@@ -41,19 +39,6 @@ class TestMarket(unittest.TestCase):
         self.assertEqual(
             stock.column(Column.Name.ADJCLOSE).df.isnull().sum().sum(), 0)
 
-    def test_get_date_range(self):
-        stock = self.reader.read_stock(["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
-        start = "2020-07-01"
-        end = "2020-09-01"
-        dates = pd.date_range(start, end)
-        stock_range = stock.get_date_range(dates)
-        self.assertEqual(stock_range.column(Column.Name.ADJCLOSE).df.shape[0], 44)
-        self.assertEqual(
-            stock_range.column(Column.Name.ADJCLOSE).df.index[0],
-            datetime.datetime.strptime(
-                "2020-07-01",
-                "%Y-%m-%d"))
-
 
 class TestColumn(unittest.TestCase):
     def setUp(self):
@@ -87,19 +72,6 @@ class TestColumn(unittest.TestCase):
         self.assertEqual(column.df.isnull().sum().sum(), 60)
         column.fill_missing_values()
         self.assertEqual(column.df.isnull().sum().sum(), 0)
-
-    def test_get_date_range(self):
-        column = self.reader.read_column(["SPY", "GOOG", "GLD"], Column.Name.ADJCLOSE)
-        start = "2020-07-01"
-        end = "2020-09-01"
-        dates = pd.date_range(start, end)
-        column_range = column.get_date_range(dates)
-        self.assertEqual(column_range.df.shape[0], 44)
-        self.assertEqual(
-            column_range.df.index[0],
-            datetime.datetime.strptime(
-                "2020-07-01",
-                "%Y-%m-%d"))
 
 if __name__ == '__main__':
     unittest.main()
