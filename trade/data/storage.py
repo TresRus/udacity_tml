@@ -23,10 +23,6 @@ class Column(object):
         self.name = name
         self.df = pd.DataFrame()
 
-    def normalize(self):
-        """Normalize data by first row"""
-        return self.df / self.df.ix[0]
-
     def portfolio_val(self, allocates, cost=1.0):
         port = self.normalize() * allocates
         port = port * cost

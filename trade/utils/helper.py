@@ -13,13 +13,6 @@ def symbol_to_path(symbol, base_dir="data", ext="csv"):
     return os.path.join(base_dir, "{}.{}".format(str(symbol), str(ext)))
 
 
-def compute_daily_returns(df):
-    """Compute and return the daily return values."""
-    dr = (df / df.shift(1)) - 1
-    dr.ix[0, :] = 0
-    return dr
-
-
 def compute_momentum(df, window):
     dr = (df - df.shift(window))
     dr.ix[0:window, :] = 0
@@ -102,14 +95,6 @@ def print_allocations(allocates, symbols):
         print symbols[x], " - ", allocates[x]
 
 
-def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Price"):
-    """Plot stock data with appropriate axis labels."""
-    ax = df.plot(title=title, fontsize=8)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    plt.show()
-
-
 def plot_to_pdf(
         name,
         dfs,
@@ -126,13 +111,6 @@ def plot_to_pdf(
             plt.close()
 
 
-def plot_hist(df, symbols, bins=20):
-    for symbol in symbols:
-        df[symbol].hist(bins=bins, label=symbol)
-    plt.legend(loc='upper right')
-    plt.show()
-
-
 def count_betas(df, symbols, base):
     res = ()
     for symbol in symbols:
@@ -142,19 +120,6 @@ def count_betas(df, symbols, base):
         b, a = np.polyfit(df[base], df[symbol], 1)
         res = res + (b,)
     return res
-
-
-def plot_scatter(df, symbols, base):
-    for symbol in symbols:
-        if symbol == base:
-            continue
-        df.plot(kind='scatter', x=base, y=symbol)
-        b, a = np.polyfit(df[base], df[symbol], 1)
-        lgl = utils.LinRegLearner()
-        lgl.train(df[base], df[symbol])
-        print symbol, lgl.m, b
-        plt.plot(df[base], lgl.query(df[base]), '-', color='r')
-        plt.show()
 
 
 def date_arg(s):
