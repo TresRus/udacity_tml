@@ -11,17 +11,14 @@ def plot_tickers(tickers, start, end):
     dates = pd.date_range(start, end)
     stock = process.ProcessLine([process.FillMissing(), process.Range(dates)]).process(
         reader.CsvReader().read_stock(tickers, [storage.Column.Name.ADJCLOSE]))
+    normalized_stock = process.Normalize().process(stock)
 
-    utils.plot_data(stock.column(storage.Column.Name.ADJCLOSE).normalize())
+    process.Plot().process(normalized_stock)
 
-    # daily_returns = utils.compute_daily_returns(ac_data.df)
-    # unitls.plot_data(daily_returns, title="Daily returns", ylabel="Daily returns")
-
-    # utils.plot_hist(daily_returns, symbol_list)
-    # daily_returns.hist(bins=20)
-    # plt.show()
-
-    # utils.plot_scatter(daily_returns, tickers, 'SPY')
+    daily_return = process.DailyReturn().process(stock)
+    process.Plot(title="Daily returns", ylabel="Return").process(daily_return)
+    process.PlotHistogram().process(daily_return)
+    process.PlotScatter("SPY").process(daily_return)
 
 
 def run():
