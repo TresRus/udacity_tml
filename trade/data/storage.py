@@ -19,19 +19,13 @@ class Column(object):
         OPEN = "Open"
         VOLUME = "Volume"
 
-    def __init__(self, column):
-        self.column = column
+    def __init__(self, name):
+        self.name = name
         self.df = pd.DataFrame()
-
-    def get_date_range(self, dates):
-        c = Column(self.column)
-        c.df = pd.DataFrame(index=dates)
-        c.df = c.df.join(self.df, how="inner")
-        return c
 
     def set_baseline(self, ticker):
         if ticker not in self.df.columns:
-            raise ValueError( "No {} ticker in {} column".format(ticker, self.column) )
+            raise ValueError( "No {} ticker in {} column".format(ticker, self.name) )
 
         # All the missing dates are not interesting for calculations.
         self.df = self.df.dropna(subset=[ticker])
@@ -77,12 +71,6 @@ class Stock(object):
             self.data[name] = Column(name)
 
         return self.data[name]
-
-    def get_date_range(self, dates):
-        m = Stock()
-        for name, column in self.data.iteritems():
-            m.data[name] = column.get_date_range(dates)
-        return m
 
     def set_baseline(self, ticker):
         for _, column in self.data.iteritems():
