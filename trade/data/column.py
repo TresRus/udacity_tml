@@ -14,7 +14,8 @@ class Statistic(object):
         self.cumulative = column.df.ix[-1] - column.df.ix[0]
         self.average = column.df.mean()
         self.risk = column.df.std()
-        self.sharpe_ratio = (self.average - daily_free_risk()) / self.risk * math.sqrt(252)
+        self.sharpe_ratio = (self.average - daily_free_risk()
+                             ) / self.risk * math.sqrt(252)
 
     def __str__(self):
         text = []

@@ -26,6 +26,7 @@ class Plot(column_base.ColumnBase):
     def process_column(self, column):
         self.plotter.plot(column.name, column.df)
 
+
 class PdfPlotter(object):
     def __init__(self, plotters, stock):
         self.plotters = plotters
@@ -35,6 +36,7 @@ class PdfPlotter(object):
         for plotter in self.plotters:
             plotter.set_present(_PdfPresent(pdf))
             Plot(plotter).process(self.stock)
+
 
 class MultyplotPdf(object):
     def __init__(self, pdf_plotters, plot_path):
