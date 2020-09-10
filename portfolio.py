@@ -30,6 +30,8 @@ def test_run():
     print str(process.statistic.Alpha('SPY').process(daily_return))
     print "Beta to SPY:"
     print str(process.statistic.Beta('SPY').process(daily_return))
+    print "Correlation:"
+    print str(process.statistic.Correlation().process(daily_return))
 
 
 if __name__ == "__main__":
