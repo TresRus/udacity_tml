@@ -18,7 +18,7 @@ class Reader(object):
     def read_stock(self, tickers, columns):
         s = storage.Stock()
         for column in columns:
-            s.data[column] = self.read_column(tickers, column)
+            s.columns[column] = self.read_column(tickers, column)
         return s
 
 
