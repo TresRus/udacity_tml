@@ -1,33 +1,7 @@
-import math
 import numpy as np
 import pandas as pd
 import scipy.optimize as spo
 from enum import Enum
-
-
-def daily_free_risk():
-    return (1.08 ** (1 / 365) - 1.0)
-
-
-class Statistic(object):
-    def __init__(self, column):
-        self.cumulative = column.df.ix[-1] - column.df.ix[0]
-        self.average = column.df.mean()
-        self.risk = column.df.std()
-        self.sharpe_ratio = (self.average - daily_free_risk()
-                             ) / self.risk * math.sqrt(252)
-
-    def __str__(self):
-        text = []
-        text.append("Cumulative:")
-        text.append(str(self.cumulative))
-        text.append("Average:")
-        text.append(str(self.average))
-        text.append("Risk:")
-        text.append(str(self.risk))
-        text.append("Sharpe ratio (year):")
-        text.append(str(self.sharpe_ratio))
-        return "\n".join(text)
 
 
 def _sum_one(allocates):
@@ -46,7 +20,10 @@ class Column(object):
 
     def __init__(self, name):
         self.name = name
-        self.df = pd.DataFrame()
+        self.data = pd.DataFrame()
+
+    def __str__(self):
+        return str(self.data)
 
     def portfolio_val(self, allocates, cost=1.0):
         port = self.normalize() * allocates
@@ -57,7 +34,7 @@ class Column(object):
         return dr.to_frame()
 
     def fit_line(self, error_func):
-        column_num = self.df.shape[1]
+        column_num = self.data.shape[1]
         init_allocates = np.ones(column_num) / column_num
         limits = ()
         for x in range(column_num):

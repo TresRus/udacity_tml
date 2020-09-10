@@ -16,19 +16,19 @@ class TestBaseline(unittest.TestCase):
         filtered_stock = Filter(["SPY"]).process(self.stock)
         self.assertListEqual(
             filtered_stock.column(
-                Column.Name.ADJCLOSE).df.columns.tolist(), ["SPY"])
+                Column.Name.ADJCLOSE).data.columns.tolist(), ["SPY"])
 
     def test_goog(self):
         filtered_stock = Filter(["GOOG"]).process(self.stock)
         self.assertListEqual(
             filtered_stock.column(
-                Column.Name.ADJCLOSE).df.columns.tolist(), ["GOOG"])
+                Column.Name.ADJCLOSE).data.columns.tolist(), ["GOOG"])
 
     def test_two(self):
         filtered_stock = Filter(["SPY", "GOOG"]).process(self.stock)
         self.assertListEqual(
             filtered_stock.column(
-                Column.Name.ADJCLOSE).df.columns.tolist(), ["SPY", "GOOG"])
+                Column.Name.ADJCLOSE).data.columns.tolist(), ["SPY", "GOOG"])
 
     def test_xom(self):
         with self.assertRaises(ValueError) as context:

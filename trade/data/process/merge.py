@@ -8,7 +8,7 @@ class Merger(object):
         for stock in stocks:
             for name, column in stock.columns.iteritems():
                 result_column = result_stock.column(name)
-                result_column.df = result_column.df.join(
-                    column.df, how="outer")
+                result_column.data = result_column.data.join(
+                    column.data, how="outer")
 
         return result_stock

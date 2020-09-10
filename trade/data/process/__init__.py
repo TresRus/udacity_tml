@@ -7,5 +7,5 @@ from normalize import Normalize
 from plot import Plot, ScreenPlot, PdfPlot, StockPlotter
 import plot
 from daily_return import DailyReturn
-from statistic import Statistic
 from filter import Filter
+import statistic

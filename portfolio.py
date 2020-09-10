@@ -18,10 +18,18 @@ def test_run():
         dates)]).process(reader.CsvReader().read_stock(tickers, [Column.Name.ADJCLOSE]))
     daily_return = process.DailyReturn().process(stock)
 
-    print process.Statistic().process(daily_return)
-
-    utils.print_statistic(stock.column(Column.Name.ADJCLOSE).df, daily_return.column(
-        Column.Name.ADJCLOSE).df, (1.08 ** (1 / 365) - 1.0))
+    print "Cumulative:"
+    print str(process.statistic.Cumulative().process(stock))
+    print "Average:"
+    print str(process.statistic.Average().process(daily_return))
+    print "Risk:"
+    print str(process.statistic.Risk().process(daily_return))
+    print "Sharpe ratio (year):"
+    print str(process.statistic.SharpeRatio().process(daily_return))
+    print "Alpha to SPY:"
+    print str(process.statistic.Alpha('SPY').process(daily_return))
+    print "Beta to SPY:"
+    print str(process.statistic.Beta('SPY').process(daily_return))
 
 
 if __name__ == "__main__":

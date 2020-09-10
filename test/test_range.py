@@ -21,9 +21,9 @@ class TestMerger(unittest.TestCase):
         stock_range = Range(dates).process(self.stock)
         self.assertEqual(
             stock_range.column(
-                Column.Name.ADJCLOSE).df.shape[0], 44)
+                Column.Name.ADJCLOSE).data.shape[0], 44)
         self.assertEqual(
-            stock_range.column(Column.Name.ADJCLOSE).df.index[0],
+            stock_range.column(Column.Name.ADJCLOSE).data.index[0],
             datetime.datetime.strptime(
                 "2020-07-01",
                 "%Y-%m-%d"))
@@ -35,7 +35,7 @@ class TestMerger(unittest.TestCase):
         stock_range = Range(dates).process(self.stock)
         self.assertEqual(
             stock_range.column(
-                Column.Name.ADJCLOSE).df.shape[0], 0)
+                Column.Name.ADJCLOSE).data.shape[0], 0)
 
     def test_get_out_of_range(self):
         start = "2010-07-01"
@@ -44,7 +44,7 @@ class TestMerger(unittest.TestCase):
         stock_range = Range(dates).process(self.stock)
         self.assertEqual(
             stock_range.column(
-                Column.Name.ADJCLOSE).df.shape[0], 0)
+                Column.Name.ADJCLOSE).data.shape[0], 0)
 
 
 if __name__ == '__main__':

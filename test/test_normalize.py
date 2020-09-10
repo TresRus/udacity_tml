@@ -16,11 +16,11 @@ class TestNormalize(unittest.TestCase):
         normalize_stock = Normalize().process(self.stock)
         self.assertEqual(
             normalize_stock.column(
-                Column.Name.ADJCLOSE).df.max().tolist(),
+                Column.Name.ADJCLOSE).data.max().tolist(),
             (self.stock.column(
-                Column.Name.ADJCLOSE).df.max() /
+                Column.Name.ADJCLOSE).data.max() /
              self.stock.column(
-                Column.Name.ADJCLOSE).df.ix[0]).tolist())
+                Column.Name.ADJCLOSE).data.ix[0]).tolist())
 
 
 if __name__ == '__main__':

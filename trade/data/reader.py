@@ -10,11 +10,11 @@ class Reader(object):
     def read_column(self, tickers, column):
         c = Column(column)
         for ticker in tickers:
-            if ticker in c.df.columns:
+            if ticker in c.data.columns:
                 continue
             df_temp = self.read(ticker, [column])
             df_temp = df_temp.rename(columns={column: ticker})
-            c.df = c.df.join(df_temp, how="outer")
+            c.data = c.data.join(df_temp, how="outer")
         return c
 
     def read_stock(self, tickers, columns):

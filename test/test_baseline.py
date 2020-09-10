@@ -16,13 +16,13 @@ class TestBaseline(unittest.TestCase):
         baseline_stock = Baseline("SPY").process(self.stock)
         self.assertEqual(
             baseline_stock.column(
-                Column.Name.ADJCLOSE).df.shape[0], 50)
+                Column.Name.ADJCLOSE).data.shape[0], 50)
 
     def test_goog(self):
         baseline_stock = Baseline("GOOG").process(self.stock)
         self.assertEqual(
             baseline_stock.column(
-                Column.Name.ADJCLOSE).df.shape[0], 30)
+                Column.Name.ADJCLOSE).data.shape[0], 30)
 
     def test_xom(self):
         with self.assertRaises(ValueError) as context:
