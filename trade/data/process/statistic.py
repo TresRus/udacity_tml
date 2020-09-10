@@ -72,3 +72,9 @@ class Beta(column_base.ColumnBase):
 
         result_column = pd.Series(data, index=column.data.columns.tolist())
         return result_column
+
+class Correlation(column_base.ColumnBase):
+    def process_column(self, column):
+        result_column = Column(column.name)
+        result_column.data = column.data.corr(method='pearson')
+        return result_column
