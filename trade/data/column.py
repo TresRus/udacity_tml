@@ -1,8 +1,18 @@
-import os
 import numpy as np
 import pandas as pd
 import scipy.optimize as spo
 from enum import Enum
+
+
+class Statistic(object):
+    class Ticker(object):
+        def __init__(self, ticker, df):
+            pass
+
+    def __init__(self, column):
+        self.tickers = {}
+        for name in column.df.columns():
+            self.tickers = Ticker(name, df)
 
 
 def _sum_one(allocates):
@@ -44,14 +54,3 @@ class Column(object):
                               method='SLSQP', bounds=limits,
                               constraints=constr, options={'disp': True})
         return result.x
-
-
-class Stock(object):
-    def __init__(self):
-        self.columns = {}
-
-    def column(self, name):
-        if name not in self.columns:
-            self.columns[name] = Column(name)
-
-        return self.columns[name]

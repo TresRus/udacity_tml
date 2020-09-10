@@ -1,6 +1,6 @@
 import pandas as pd
 import column_base
-from trade.data import storage
+from trade.data import Column
 
 
 class Range(column_base.ColumnBase):
@@ -8,7 +8,7 @@ class Range(column_base.ColumnBase):
         self.dates = dates
 
     def process_column(self, column):
-        result_column = storage.Column(column.name)
+        result_column = Column(column.name)
         result_column.df = pd.DataFrame(index=self.dates)
         result_column.df = result_column.df.join(column.df, how="inner")
         return result_column

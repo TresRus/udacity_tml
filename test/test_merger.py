@@ -1,6 +1,6 @@
 import unittest
 import os
-from trade.data.storage import (Column)
+from trade.data import (Column)
 from trade.data.reader import (CsvReader)
 from trade.data.process import (Merger)
 

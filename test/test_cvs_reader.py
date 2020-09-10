@@ -1,6 +1,6 @@
 import unittest
 import os
-from trade.data.storage import (Stock, Column)
+from trade.data import (Stock, Column)
 from trade.data.reader import (CsvReader)
 
 

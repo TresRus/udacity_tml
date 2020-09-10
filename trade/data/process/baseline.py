@@ -1,5 +1,5 @@
 import column_base
-from trade.data import storage
+from trade.data import Column
 
 
 class Baseline(column_base.ColumnBase):
@@ -12,6 +12,6 @@ class Baseline(column_base.ColumnBase):
                 "No {} ticker in {} column".format(
                     self.ticker, column.name))
 
-        result_column = storage.Column(column.name)
+        result_column = Column(column.name)
         result_column.df = column.df.dropna(subset=[self.ticker])
         return result_column
