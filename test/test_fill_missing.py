@@ -15,12 +15,12 @@ class TestBaseline(unittest.TestCase):
     def test_fill(self):
         self.assertEqual(
             self.stock.column(
-                Column.Name.ADJCLOSE).df.isnull().sum().sum(),
+                Column.Name.ADJCLOSE).data.isnull().sum().sum(),
             60)
         filled_stock = FillMissing().process(self.stock)
         self.assertEqual(
             filled_stock.column(
-                Column.Name.ADJCLOSE).df.isnull().sum().sum(), 0)
+                Column.Name.ADJCLOSE).data.isnull().sum().sum(), 0)
 
 
 if __name__ == '__main__':

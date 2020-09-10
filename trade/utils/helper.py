@@ -73,17 +73,6 @@ def reverse_sr(allocates, mdp):
                         daily_free_risk()) * -1
 
 
-def print_statistic(df, daily_returns, daily_free_risk):
-    print "Cumulative return:"
-    print df.ix[-1] - df.ix[0]
-    print "Avg. daily return:"
-    print daily_returns.mean()
-    print "Risk:"
-    print daily_returns.std()
-    print "Sharpe ratio (year):"
-    print sharpe_ratio(df, daily_returns, daily_free_risk)
-
-
 def print_allocations(allocates, symbols):
     for x in range(len(allocates)):
         print symbols[x], " - ", allocates[x]

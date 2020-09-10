@@ -24,7 +24,7 @@ class Plot(column_base.ColumnBase):
         self.plotter = plotter
 
     def process_column(self, column):
-        self.plotter.plot(column.name, column.df)
+        self.plotter.plot(column.name, column.data)
 
 
 class StockPlotter(object):
@@ -110,29 +110,34 @@ class Histogram(Plotter):
         plt.axvline(mean, color='black', linestyle='dashed', linewidth=2)
         plt.axvline(mean+std, color='r', linestyle='dashed', linewidth=2)
         plt.axvline(mean-std, color='r', linestyle='dashed', linewidth=2)
+        plt.title("avg={} std={}".format(mean, std))
 
         plt.legend(loc='upper right')
         self.present()
 
 
 class Scatter(Plotter):
-    def __init__(self, base_ticker):
+    def __init__(self, baseline, learner=utils.LinRegLearner()):
         super(Scatter, self).__init__()
-        self.base_ticker = base_ticker
+        self.baseline = baseline
+        self.learner = learner
 
     def plot(self, name, df):
-        if self.base_ticker not in df.columns:
+        if self.baseline not in df.columns:
             raise ValueError(
                 "No {} ticker in {} column".format(
-                    self.base_ticker, name))
+                    self.baseline, name))
 
         for ticker in df.columns:
-            if ticker == self.base_ticker:
+            if ticker == self.baseline:
                 continue
-            df.plot(kind='scatter', x=self.base_ticker, y=ticker)
-            b, a = np.polyfit(df[self.base_ticker], df[ticker], 1)
-            lgl = utils.LinRegLearner()
-            lgl.train(df[self.base_ticker], df[ticker])
-            plt.plot(df[self.base_ticker], lgl.query(
-                df[self.base_ticker]), '-', color='r')
+
+            df.plot(kind='scatter', x=self.baseline, y=ticker)
+
+            b, a = np.polyfit(df[self.baseline], df[ticker], 1)
+
+            self.learner.train(df[self.baseline], df[ticker])
+            plt.plot(df[self.baseline], self.learner.query(
+                df[self.baseline]), '-', color='r')
+            plt.title("alpha={} beta={}".format(self.learner.m, self.learner.b))
             self.present()

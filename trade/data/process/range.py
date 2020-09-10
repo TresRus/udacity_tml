@@ -9,6 +9,6 @@ class Range(column_base.ColumnBase):
 
     def process_column(self, column):
         result_column = Column(column.name)
-        result_column.df = pd.DataFrame(index=self.dates)
-        result_column.df = result_column.df.join(column.df, how="inner")
+        result_column.data = pd.DataFrame(index=self.dates)
+        result_column.data = result_column.data.join(column.data, how="inner")
         return result_column
