@@ -1,18 +1,32 @@
+import math
 import numpy as np
 import pandas as pd
 import scipy.optimize as spo
 from enum import Enum
 
 
-class Statistic(object):
-    class Ticker(object):
-        def __init__(self, ticker, df):
-            pass
+def daily_free_risk():
+    return (1.08 ** (1 / 365) - 1.0)
 
+
+class Statistic(object):
     def __init__(self, column):
-        self.tickers = {}
-        for name in column.df.columns():
-            self.tickers = Ticker(name, df)
+        self.cumulative = column.df.ix[-1] - column.df.ix[0]
+        self.average = column.df.mean()
+        self.risk = column.df.std()
+        self.sharpe_ratio = (self.average - daily_free_risk()) / self.risk * math.sqrt(252)
+
+    def __str__(self):
+        text = []
+        text.append("Cumulative:")
+        text.append(str(self.cumulative))
+        text.append("Average:")
+        text.append(str(self.average))
+        text.append("Risk:")
+        text.append(str(self.risk))
+        text.append("Sharpe ratio (year):")
+        text.append(str(self.sharpe_ratio))
+        return "\n".join(text)
 
 
 def _sum_one(allocates):

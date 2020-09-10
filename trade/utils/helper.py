@@ -59,9 +59,7 @@ def compute_prediction(df, predict):
     return dr
 
 
-def sharpe_ratio(df, daily_free_risk):
-    daily_returns = compute_daily_returns(df)
-
+def sharpe_ratio(df, daily_returns, daily_free_risk):
     return (daily_returns.mean() - daily_free_risk) / \
         daily_returns.std() * math.sqrt(252)
 
@@ -75,9 +73,7 @@ def reverse_sr(allocates, mdp):
                         daily_free_risk()) * -1
 
 
-def print_statistic(df, daily_free_risk):
-    daily_returns = compute_daily_returns(df)
-
+def print_statistic(df, daily_returns, daily_free_risk):
     print "Cumulative return:"
     print df.ix[-1] - df.ix[0]
     print "Avg. daily return:"
@@ -85,7 +81,7 @@ def print_statistic(df, daily_free_risk):
     print "Risk:"
     print daily_returns.std()
     print "Sharpe ratio (year):"
-    print sharpe_ratio(df, daily_free_risk)
+    print sharpe_ratio(df, daily_returns, daily_free_risk)
 
 
 def print_allocations(allocates, symbols):
