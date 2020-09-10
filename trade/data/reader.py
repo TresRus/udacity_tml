@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import storage
+from trade.data import (Column, Stock)
 
 
 class Reader(object):
@@ -8,7 +8,7 @@ class Reader(object):
         raise NotImplementedError
 
     def read_column(self, tickers, column):
-        c = storage.Column(column)
+        c = Column(column)
         for ticker in tickers:
             df_temp = self.read(ticker, [column])
             df_temp = df_temp.rename(columns={column: ticker})
@@ -16,7 +16,7 @@ class Reader(object):
         return c
 
     def read_stock(self, tickers, columns):
-        s = storage.Stock()
+        s = Stock()
         for column in columns:
             s.columns[column] = self.read_column(tickers, column)
         return s
@@ -30,13 +30,13 @@ class CsvReader(Reader):
         return os.path.join(self.root, "{}.csv".format(str(ticker)))
 
     def read(self, ticker, columns):
-        if storage.Column.Name.DATE not in columns:
-            columns += [storage.Column.Name.DATE]
+        if Column.Name.DATE not in columns:
+            columns += [Column.Name.DATE]
 
         file_path = self._ticker_cvs_path(ticker)
         return pd.read_csv(
             file_path,
             parse_dates=True,
-            index_col=storage.Column.Name.DATE,
+            index_col=Column.Name.DATE,
             usecols=columns,
             na_values=["nan"])

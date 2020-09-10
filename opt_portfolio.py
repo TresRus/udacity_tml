@@ -1,7 +1,6 @@
 import os
 import argparse
 import pandas as pd
-import matplotlib.pyplot as plt
 from trade import utils
 from trade.data import (storage, reader, process)
 

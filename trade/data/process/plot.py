@@ -3,7 +3,6 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from trade import utils
-from trade.data import storage
 
 
 class _ScreenPresent(object):

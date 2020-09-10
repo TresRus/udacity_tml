@@ -1,9 +1,9 @@
-from trade.data import storage
+from trade.data import Stock
 
 
 class Merger(object):
     def process(self, stocks):
-        result_stock = storage.Stock()
+        result_stock = Stock()
 
         for stock in stocks:
             for name, column in stock.columns.iteritems():

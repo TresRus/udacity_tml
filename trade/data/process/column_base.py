@@ -1,4 +1,4 @@
-from trade.data import storage
+from trade.data import Stock
 
 
 class ColumnBase(object):
@@ -6,7 +6,7 @@ class ColumnBase(object):
         raise NotImplementedError
 
     def process(self, stock):
-        result_stock = storage.Stock()
+        result_stock = Stock()
 
         for name, column in stock.columns.iteritems():
             result_stock.columns[name] = self.process_column(column)
