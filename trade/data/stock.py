@@ -1,6 +1,7 @@
 from trade.data.column import Column
 import trade.data.column
 
+
 class Statistic(object):
     def __init__(self, stock):
         self.columns = {}

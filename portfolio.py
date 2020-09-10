@@ -20,7 +20,8 @@ def test_run():
 
     print process.Statistic().process(daily_return)
 
-    utils.print_statistic(stock.column(Column.Name.ADJCLOSE).df, daily_return.column(Column.Name.ADJCLOSE).df, (1.08 ** (1 / 365) - 1.0))
+    utils.print_statistic(stock.column(Column.Name.ADJCLOSE).df, daily_return.column(
+        Column.Name.ADJCLOSE).df, (1.08 ** (1 / 365) - 1.0))
 
 
 if __name__ == "__main__":
