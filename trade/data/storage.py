@@ -48,10 +48,10 @@ class Column(object):
 
 class Stock(object):
     def __init__(self):
-        self.data = {}
+        self.columns = {}
 
     def column(self, name):
-        if name not in self.data:
-            self.data[name] = Column(name)
+        if name not in self.columns:
+            self.columns[name] = Column(name)
 
-        return self.data[name]
+        return self.columns[name]

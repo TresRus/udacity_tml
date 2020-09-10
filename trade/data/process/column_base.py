@@ -8,7 +8,7 @@ class ColumnBase(object):
     def process(self, stock):
         result_stock = storage.Stock()
 
-        for name, column in stock.data.iteritems():
-            result_stock.data[name] = self.process_column(column)
+        for name, column in stock.columns.iteritems():
+            result_stock.columns[name] = self.process_column(column)
 
         return result_stock
