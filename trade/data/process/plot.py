@@ -81,13 +81,36 @@ class Graph(Plotter):
 
 
 class Histogram(Plotter):
-    def __init__(self, bins=20):
+    def __init__(self, baseline=None, bins=20):
         super(Histogram, self).__init__()
         self.bins = bins
+        self.baseline = baseline
 
     def plot(self, name, df):
+        bl = self.baseline or df.columns[0]
+
+        _, ax = plt.subplots()
+
+        bl_h, bl_bins = np.histogram(df[bl], bins=self.bins)
+        width = (bl_bins[1] - bl_bins[0]) / len(df.columns)
+
+        ax.bar(bl_bins[:-1], bl_h, width=width, label=bl)
+
+        count = 1
         for ticker in df.columns:
-            df[ticker].hist(bins=self.bins, label=ticker)
+            if ticker == bl:
+                continue
+            h, bins = np.histogram(df[ticker], bins=bl_bins)
+            ax.bar(bins[:-1] + (width*count), h, width=width, label=ticker)
+            count += 1
+
+        mean = df[bl].mean()
+        std = df[bl].std()
+
+        plt.axvline(mean, color='black', linestyle='dashed', linewidth=2)
+        plt.axvline(mean+std, color='r', linestyle='dashed', linewidth=2)
+        plt.axvline(mean-std, color='r', linestyle='dashed', linewidth=2)
+
         plt.legend(loc='upper right')
         self.present()
 

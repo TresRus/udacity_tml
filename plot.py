@@ -22,7 +22,7 @@ def plot_tickers(tickers, baseline, start, end):
     plot_path = os.path.join(plot_dir, "Market.pdf")
     process.PdfPlot([process.StockPlotter([process.plot.Graph()],
                                           normalized_stock),
-                     process.StockPlotter([process.plot.Histogram()],
+                     process.StockPlotter([process.plot.Histogram(baseline=baseline)],
                                           daily_return)],
                     plot_path).plot()
 
