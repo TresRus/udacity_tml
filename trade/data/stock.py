@@ -7,6 +7,13 @@ class Statistic(object):
         for name, column in stock.columns.iteritems():
             self.columns[name] = trade.data.column.Statistic(column)
 
+    def __str__(self):
+        text = []
+        for name, column in self.columns.iteritems():
+            text.append("Column {}:".format(name))
+            text.append(str(column))
+        return "\n".join(text)
+
 
 class Stock(object):
     def __init__(self):
