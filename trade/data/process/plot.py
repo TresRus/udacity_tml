@@ -27,38 +27,35 @@ class Plot(column_base.ColumnBase):
         self.plotter.plot(column.name, column.df)
 
 
-class PdfPlotter(object):
+class StockPlotter(object):
     def __init__(self, plotters, stock):
         self.plotters = plotters
         self.stock = stock
 
-    def plot(self, pdf):
+    def plot(self, present):
         for plotter in self.plotters:
-            plotter.set_present(_PdfPresent(pdf))
+            plotter.set_present(present)
             Plot(plotter).process(self.stock)
 
 
-class MultyplotPdf(object):
-    def __init__(self, pdf_plotters, plot_path):
-        self.pdf_plotters = pdf_plotters
-        self.plot_path = plot_path
+class ScreenPlot(column_base.ColumnBase):
+    def __init__(self, plotters):
+        self.plotters = plotters
 
     def plot(self):
-        with PdfPages(self.plot_path) as pdf:
-            for pdf_plotter in self.pdf_plotters:
-                pdf_plotter.plot(pdf)
+        for plotter in self.plotters:
+            plotter.plot(_ScreenPresent())
 
 
-class PlotPdf(object):
+class PdfPlot(object):
     def __init__(self, plotters, plot_path):
         self.plotters = plotters
         self.plot_path = plot_path
 
-    def process(self, stock):
+    def plot(self):
         with PdfPages(self.plot_path) as pdf:
             for plotter in self.plotters:
-                plotter.set_present(_PdfPresent(pdf))
-                Plot(plotter).process(stock)
+                plotter.plot(_PdfPresent(pdf))
 
 
 class Plotter(object):

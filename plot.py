@@ -20,8 +20,11 @@ def plot_tickers(tickers, baseline, start, end):
         os.makedirs(plot_dir)
 
     plot_path = os.path.join(plot_dir, "Market.pdf")
-    process.PlotPdf([process.plot.Graph()],
-                    plot_path).process(normalized_stock)
+    process.PdfPlot([process.StockPlotter([process.plot.Graph()],
+                                          normalized_stock),
+                     process.StockPlotter([process.plot.Histogram()],
+                                          daily_return)],
+                    plot_path).plot()
 
     for ticker in tickers:
         plot_path = os.path.join(plot_dir, "{}.pdf".format(ticker))
@@ -30,15 +33,15 @@ def plot_tickers(tickers, baseline, start, end):
         tdr = process.Filter([ticker]).process(daily_return)
         btdr = process.Filter([ticker, baseline]).process(daily_return)
 
-        process.MultyplotPdf([process.PdfPlotter([process.plot.Graph(title="Stock")],
-                                                 tstock),
-                              process.PdfPlotter([process.plot.Graph(title="Daily returns",
-                                                                     ylabel="Return"),
-                                                  process.plot.Histogram()],
-                                                 tdr),
-                              process.PdfPlotter([process.plot.Scatter(baseline)],
-                                                 btdr)],
-                             plot_path).plot()
+        process.PdfPlot([process.StockPlotter([process.plot.Graph(title="Stock")],
+                                              tstock),
+                         process.StockPlotter([process.plot.Graph(title="Daily returns",
+                                                                  ylabel="Return"),
+                                               process.plot.Histogram()],
+                                              tdr),
+                         process.StockPlotter([process.plot.Scatter(baseline)],
+                                              btdr)],
+                        plot_path).plot()
 
 
 def run():
