@@ -3,36 +3,38 @@ import argparse
 import pandas as pd
 from trade import utils
 from trade.data import (Column, reader, process)
+import trade.type
 
 
-def test_run():
+def portfolio(allocations, baseline, start, end):
     """Function called by Test Run."""
-    baseline = "SPY"
-    tickers = ["SPY", "GOOG", "AAPL", "XOM"]
-    allocates = [0.3, 0.4, 0.1, 0.1]
-    start_date = "2010-12-31"
-    end_date = "2017-12-01"
-    dates = pd.date_range(start_date, end_date)
+    tickers = [ allocation.ticker for allocation in allocations ]
+    dates = pd.date_range(start, end)
 
     stock = process.ProcessLine([process.Baseline(baseline), process.FillMissing(), process.Range(
         dates)]).process(reader.CsvReader().read_stock(tickers, [Column.Name.ADJCLOSE]))
-    daily_return = process.DailyReturn().process(stock)
 
-    print "Cumulative:"
-    print str(process.statistic.Cumulative().process(stock))
-    print "Average:"
-    print str(process.statistic.Average().process(daily_return))
-    print "Risk:"
-    print str(process.statistic.Risk().process(daily_return))
-    print "Sharpe ratio (year):"
-    print str(process.statistic.SharpeRatio().process(daily_return))
-    print "Alpha to SPY:"
-    print str(process.statistic.Alpha('SPY').process(daily_return))
-    print "Beta to SPY:"
-    print str(process.statistic.Beta('SPY').process(daily_return))
-    print "Correlation:"
-    print str(process.statistic.Correlation().process(daily_return))
+    stock = process.Normalize().process(stock)
+    portfolio = process.Portfolio(allocations).process(stock)
+    stock = process.Merger().process([stock, portfolio])
+
+    process.statistic.Print().process(stock)
+    process.Plot(process.plot.Graph()).process(stock)
+
+def run():
+    parser = argparse.ArgumentParser(description='Portfolio statistic.')
+    parser.add_argument('allocations', metavar='T', type=trade.type.Allocation.argparse, nargs='+',
+                        help='ticker and the part to include in portfolio')
+    parser.add_argument('-b', '--baseline', default="SPY", type=str,
+                        help='baseline ticker')
+    parser.add_argument('-s', '--start', required=True, type=trade.type.date,
+                        help="Evaluation start date")
+    parser.add_argument('-e', '--end', required=True, type=trade.type.date,
+                        help="Evaluation end date")
+    args = parser.parse_args()
+
+    portfolio(args.allocations, args.baseline, args.start, args.end)
 
 
 if __name__ == "__main__":
-    test_run()
+    run()
