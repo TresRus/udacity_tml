@@ -101,15 +101,15 @@ class Histogram(Plotter):
             if ticker == bl:
                 continue
             h, bins = np.histogram(df[ticker], bins=bl_bins)
-            ax.bar(bins[:-1] + (width*count), h, width=width, label=ticker)
+            ax.bar(bins[:-1] + (width * count), h, width=width, label=ticker)
             count += 1
 
         mean = df[bl].mean()
         std = df[bl].std()
 
         plt.axvline(mean, color='black', linestyle='dashed', linewidth=2)
-        plt.axvline(mean+std, color='r', linestyle='dashed', linewidth=2)
-        plt.axvline(mean-std, color='r', linestyle='dashed', linewidth=2)
+        plt.axvline(mean + std, color='r', linestyle='dashed', linewidth=2)
+        plt.axvline(mean - std, color='r', linestyle='dashed', linewidth=2)
         plt.title("avg={} std={}".format(mean, std))
 
         plt.legend(loc='upper right')
@@ -139,5 +139,8 @@ class Scatter(Plotter):
             self.learner.train(df[self.baseline], df[ticker])
             plt.plot(df[self.baseline], self.learner.query(
                 df[self.baseline]), '-', color='r')
-            plt.title("alpha={} beta={}".format(self.learner.m, self.learner.b))
+            plt.title(
+                "alpha={} beta={}".format(
+                    self.learner.m,
+                    self.learner.b))
             self.present()

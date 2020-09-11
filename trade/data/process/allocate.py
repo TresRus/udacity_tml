@@ -10,7 +10,9 @@ class Allocate(column_base.ColumnBase):
         if len(self.parts) != len(column.data.columns):
             raise ValueError(
                 "Column {}: Parts size is not equal to columns size: {} != {}".format(
-                    column.name, len(self.parts), len(column.data.columns)))
+                    column.name, len(
+                        self.parts), len(
+                        column.data.columns)))
 
         result_column = Column(column.name)
         result_column.data = column.data * self.parts

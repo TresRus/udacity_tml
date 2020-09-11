@@ -8,7 +8,7 @@ import trade.type
 
 def portfolio(allocations, baseline, start, end):
     """Function called by Test Run."""
-    tickers = [ allocation.ticker for allocation in allocations ]
+    tickers = [allocation.ticker for allocation in allocations]
     dates = pd.date_range(start, end)
 
     stock = process.ProcessLine([process.Baseline(baseline), process.FillMissing(), process.Range(
@@ -21,10 +21,15 @@ def portfolio(allocations, baseline, start, end):
     process.statistic.Print().process(stock)
     process.Plot(process.plot.Graph()).process(stock)
 
+
 def run():
     parser = argparse.ArgumentParser(description='Portfolio statistic.')
-    parser.add_argument('allocations', metavar='T', type=trade.type.Allocation.argparse, nargs='+',
-                        help='ticker and the part to include in portfolio')
+    parser.add_argument(
+        'allocations',
+        metavar='T',
+        type=trade.type.Allocation.argparse,
+        nargs='+',
+        help='ticker and the part to include in portfolio')
     parser.add_argument('-b', '--baseline', default="SPY", type=str,
                         help='baseline ticker')
     parser.add_argument('-s', '--start', required=True, type=trade.type.date,
