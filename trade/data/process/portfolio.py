@@ -9,7 +9,11 @@ class Portfolio(object):
         total = sum(self.parts)
         self.parts = [float(part) / total for part in self.parts]
         self.total_cost = total_cost
+        self.line = ProcessLine([Filter(self.tickers), Allocate(self.parts), Multiply(
+            self.total_cost), Sum("Portfolio")])
+
+    def process_column(self, column):
+        return self.line.process_column(column)
 
     def process(self, stock):
-        return ProcessLine([Filter(self.tickers), Allocate(self.parts), Multiply(
-            self.total_cost), Sum("Portfolio")]).process(stock)
+        return self.line.process(stock)

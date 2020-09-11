@@ -7,6 +7,9 @@ class Allocation(object):
         self.ticker = ticker
         self.number = number
 
+    def __str__(self):
+        return "{} - {}".format(self.ticker, self.number)
+
     @staticmethod
     def argparse(value):
         parts = value.split(":")
