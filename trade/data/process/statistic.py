@@ -12,17 +12,20 @@ class Cumulative(column_base.ColumnBase):
         result_column.data = column.data.ix[-1] - column.data.ix[0]
         return result_column
 
+
 class Average(column_base.ColumnBase):
     def process_column(self, column):
         result_column = Column(column.name)
         result_column.data = column.data.mean()
         return result_column
 
+
 class Risk(column_base.ColumnBase):
     def process_column(self, column):
         result_column = Column(column.name)
         result_column.data = column.data.std()
         return result_column
+
 
 class SharpeRatio(column_base.ColumnBase):
     def __init__(self, risk_free=0.00, days=252):
@@ -31,8 +34,10 @@ class SharpeRatio(column_base.ColumnBase):
 
     def process_column(self, column):
         result_column = Column(column.name)
-        result_column.data = (column.data.mean() - self.daily_free_risk) / column.data.std() * math.sqrt(self.days)
+        result_column.data = (column.data.mean(
+        ) - self.daily_free_risk) / column.data.std() * math.sqrt(self.days)
         return result_column
+
 
 class Alpha(column_base.ColumnBase):
     def __init__(self, ticker):
@@ -54,6 +59,7 @@ class Alpha(column_base.ColumnBase):
         result_column = pd.Series(data, index=column.data.columns.tolist())
         return result_column
 
+
 class Beta(column_base.ColumnBase):
     def __init__(self, ticker):
         self.ticker = ticker
@@ -74,11 +80,13 @@ class Beta(column_base.ColumnBase):
         result_column = pd.Series(data, index=column.data.columns.tolist())
         return result_column
 
+
 class Correlation(column_base.ColumnBase):
     def process_column(self, column):
         result_column = Column(column.name)
         result_column.data = column.data.corr(method='pearson')
         return result_column
+
 
 class Print(object):
     def process(self, stock):
