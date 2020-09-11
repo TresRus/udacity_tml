@@ -4,11 +4,6 @@ import os
 import math
 
 
-def symbol_to_path(symbol, base_dir="data", ext="csv"):
-    """Return CSV file path given ticker symbol."""
-    return os.path.join(base_dir, "{}.{}".format(str(symbol), str(ext)))
-
-
 def compute_momentum(df, window):
     dr = (df - df.shift(window))
     dr.ix[0:window, :] = 0
@@ -57,23 +52,9 @@ def compute_prediction(df, predict):
     return dr
 
 
-def sharpe_ratio(df, daily_returns, daily_free_risk):
-    return (daily_returns.mean() - daily_free_risk) / \
-        daily_returns.std() * math.sqrt(252)
-
-
-def daily_free_risk():
-    return (1.08 ** (1 / 365) - 1.0)
-
-
 def reverse_sr(allocates, mdp):
     return sharpe_ratio(mdp.portfolio_val(allocates),
                         daily_free_risk()) * -1
-
-
-def print_allocations(allocates, symbols):
-    for x in range(len(allocates)):
-        print symbols[x], " - ", allocates[x]
 
 
 def count_betas(df, symbols, base):
