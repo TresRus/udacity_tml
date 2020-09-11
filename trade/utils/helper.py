@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import os
 import math
-import argparse
-import datetime
 
 
 def symbol_to_path(symbol, base_dir="data", ext="csv"):
@@ -87,11 +85,3 @@ def count_betas(df, symbols, base):
         b, a = np.polyfit(df[base], df[symbol], 1)
         res = res + (b,)
     return res
-
-
-def date_arg(s):
-    try:
-        return datetime.datetime.strptime(s, "%Y-%m-%d")
-    except ValueError:
-        msg = "Not a valid date: %s. Should be in forman YYYY-MM-DD (example: 2020-09-05)." % s
-        raise argparse.ArgumentTypeError(msg)

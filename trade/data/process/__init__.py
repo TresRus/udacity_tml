@@ -9,3 +9,7 @@ import plot
 from daily_return import DailyReturn
 from filter import Filter
 import statistic
+from allocate import Allocate
+from multiply import Multiply
+from sum import Sum
+from portfolio import Portfolio
