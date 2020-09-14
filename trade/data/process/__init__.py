@@ -18,7 +18,7 @@ from moving_average import MovingAverage
 from moving_std import MovingStd
 from bollinger_bands import UpperBollingerBand, LowerBollingerBand
 from exponential_moving_average import ExponentialMovingAverage
-from relative_strength import RelativeStrength
+from relative_strength import RelativeStrength, RelativeStrengthIndex
 from ticker_suffix import TickerSuffix
 from tail import Tail
 from emad import Emad

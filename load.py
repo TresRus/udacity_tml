@@ -31,7 +31,7 @@ def run():
                         help='ticker to download')
     args = parser.parse_args()
 
-    load_tickers(tickers)
+    load_tickers(args.tickers)
 
 
 if __name__ == "__main__":

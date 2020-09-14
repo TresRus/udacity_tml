@@ -64,13 +64,17 @@ def plot_tickers(tickers, baseline, window, start, end):
         stock_macd = process.Tail(
             window * 3).process(process.Merger().process([tstock_emad, tstock_macd]))
         short_tdr = process.Tail(window * 3).process(tdr)
+        stock_rsi = process.ProcessLine([process.TickerSuffix("_rsi({})".format(
+            window)), process.RelativeStrengthIndex(window), process.Tail(window * 3)]).process(tstock)
 
         process.PdfPlot([process.StockPlotter([process.plot.Graph(title="Stock with bands")],
                                               stock_bands),
                          process.StockPlotter([process.plot.Graph(title="Stock with averages")],
                                               stock_avgs),
-                         process.StockPlotter([process.plot.Graph(title="Macd")],
+                         process.StockPlotter([process.plot.Graph(title="MACD")],
                                               stock_macd),
+                         process.StockPlotter([process.plot.Graph(title="RSI")],
+                                              stock_rsi),
                          process.StockPlotter([process.plot.Graph(title="Daily returns",
                                                                   ylabel="Return")],
                                               short_tdr),
