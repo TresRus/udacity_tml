@@ -149,8 +149,13 @@ def prepare_input(df, window, predict):
     return res
 
 
+def compute_prediction(df, predict):
+    """Compute and return the daily return values."""
+    dr = df.shift(-predict)
+    return dr
+
 def prepare_output(df, window, predict):
-    pred = utils.compute_prediction(df, predict)
+    pred = compute_prediction(df, predict)
     return pred[window:-predict]
 
 
