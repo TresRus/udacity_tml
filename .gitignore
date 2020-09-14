@@ -1,5 +1,7 @@
+*.swp
 *.pyc
 htmls
-cc_data
-top100.json
-plots
+/cc_data
+/top100.json
+/plots/
+/data/

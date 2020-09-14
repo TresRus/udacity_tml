@@ -1,53 +1,52 @@
-import numpy as np
+import os
+import argparse
 import pandas as pd
-import matplotlib.pyplot as plt
-import scipy.optimize as spo
-import utils
+from trade import utils
+from trade.data import (Column, reader, process)
+import trade.type
+import trade.data.optimize
 
-def reverse_sr(allocates, df):
-    return utils.sharpe_ratio(utils.portfolio_val(df, allocates), utils.daily_free_risk()) * -1;
 
-def sum_one(allocates):
-    return np.sum(allocates) - 1.0
+def optimize(tickers, baseline, start, end):
+    if baseline not in tickers:
+        tickers += [baseline]
 
-def fit_line(df, error_func):
-    column_num = df.shape[1]
-    init_allocates = np.ones(column_num) / column_num
+    dates = pd.date_range(start, end)
+    stock = process.ProcessLine([process.Baseline(baseline), process.FillMissing(), process.Range(
+        dates)]).process(reader.CsvReader().read_stock(tickers, [Column.Name.ADJCLOSE]))
 
-    limits = ()
-    for x in range(column_num):
-        limits += ((0.0, 1.0),)
+    stock = process.Normalize().process(stock)
 
-    constr = {'type':'eq', 'fun':sum_one}
+    allocations = trade.data.optimize.FitLine(
+        trade.data.optimize.ReversSharpeRatio()).run(
+        stock.column(
+            Column.Name.ADJCLOSE))
 
-    result = spo.minimize(error_func, init_allocates, args=(df,), method='SLSQP', bounds=limits, constraints=constr, options={'disp': True})
-    return result.x
+    for allocation in allocations:
+        print(allocation)
 
-def test_run():
-    """Function called by Test Run."""
-    symbol_list = ["SPY", "GOOG", "AAPL", "XOM", "GLD"]
-    start_date = "2015-01-01"
-    end_date = "2016-01-01"
-    dates = pd.date_range(start_date, end_date)
-    df_data = utils.get_snp_data(symbol_list, dates)
-    utils.fill_missing_values(df_data)
+    portfolio = process.Portfolio(allocations).process(stock)
+    stock = process.Merger().process([stock, portfolio])
 
-    norm = utils.normolize(df_data)
-    utils.print_statistic(norm, utils.daily_free_risk())
+    process.statistic.Print().process(stock)
+    process.ProcessLine([process.Filter([baseline, 'Portfolio']), process.Plot(
+        process.plot.Graph())]).process(stock)
 
-    market = utils.normolize(utils.get_snp_data(["SPY"], dates))
 
-    result_allocates = fit_line(df_data, reverse_sr)
-    utils.print_allocations(result_allocates, symbol_list)
+def run():
+    parser = argparse.ArgumentParser(description='Create optimal portfolio.')
+    parser.add_argument('tickers', metavar='T', type=str, nargs='+',
+                        help='ticker to include in portfolio')
+    parser.add_argument('-b', '--baseline', default="SPY", type=str,
+                        help='baseline ticker')
+    parser.add_argument('-s', '--start', required=True, type=trade.type.date,
+                        help="Evaluation start date")
+    parser.add_argument('-e', '--end', required=True, type=trade.type.date,
+                        help="Evaluation end date")
+    args = parser.parse_args()
 
-    portfolio = utils.portfolio_val(df_data, result_allocates)
-    market = market.join(portfolio)
-
-    utils.print_statistic(market, utils.daily_free_risk())
-
-    utils.plot_data(market)
+    optimize(args.tickers, args.baseline, args.start, args.end)
 
 
 if __name__ == "__main__":
-    test_run()
-
+    run()
