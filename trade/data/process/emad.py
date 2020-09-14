@@ -1,6 +1,6 @@
-import column_base
+from . import column_base
+from .exponential_moving_average import ExponentialMovingAverage
 from trade.data import Column
-from exponential_moving_average import ExponentialMovingAverage
 
 
 class Emad(column_base.ColumnBase):

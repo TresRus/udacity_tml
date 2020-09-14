@@ -1,4 +1,4 @@
-import column_base
+from . import column_base
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt

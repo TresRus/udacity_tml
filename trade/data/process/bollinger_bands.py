@@ -1,7 +1,7 @@
-import column_base
+from . import column_base
+from .moving_average import MovingAverage
+from .moving_std import MovingStd
 from trade.data import Column
-from moving_average import MovingAverage
-from moving_std import MovingStd
 
 
 class UpperBollingerBand(column_base.ColumnBase):

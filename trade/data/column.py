@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class Column(object):
-    class Name(Enum):
+    class Name(object):
         DATE = "Date"
         ADJCLOSE = "Adj Close"
         CLOSE = "Close"

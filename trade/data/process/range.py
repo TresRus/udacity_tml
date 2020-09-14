@@ -1,5 +1,5 @@
 import pandas as pd
-import column_base
+from . import column_base
 from trade.data import Column
 
 

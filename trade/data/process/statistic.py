@@ -1,6 +1,6 @@
 import math
 import pandas as pd
-import column_base
+from . import column_base
 from trade import utils
 from trade.data import Column
 from trade.data.process import DailyReturn

@@ -8,7 +8,7 @@ class Stock(object):
 
     def __str__(self):
         text = []
-        for name, column in self.columns.iteritems():
+        for name, column in self.columns.items():
             text.append("Column {}:".format(name))
             text.append(str(column))
         return "\n".join(text)
