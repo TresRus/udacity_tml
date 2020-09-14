@@ -1,13 +1,20 @@
 import numpy as np
 import scipy.optimize as spo
 from trade.type import Allocation
-from trade.data.process import (ProcessLine, DailyReturn, Portfolio, Multiply, statistic)
+from trade.data.process import (
+    ProcessLine,
+    DailyReturn,
+    Portfolio,
+    Multiply,
+    statistic)
+
 
 def _sum_one(allocates):
     return np.sum(allocates) - 1.0
 
+
 def _lists_to_allocations(columns, parts):
-    return [ Allocation(columns[i], parts[i]) for i in range(len(columns)) ]
+    return [Allocation(columns[i], parts[i]) for i in range(len(columns))]
 
 
 class FitLine(object):
@@ -28,6 +35,8 @@ class FitLine(object):
                               constraints=constr, options={'disp': True})
         return _lists_to_allocations(column.data.columns, result.x)
 
+
 class ReversSharpeRatio(object):
     def __call__(self, parts, column):
-        return ProcessLine([Portfolio(_lists_to_allocations(column.data.columns, parts)), DailyReturn(), statistic.SharpeRatio(), Multiply(-1)]).process_column(column).data
+        return ProcessLine([Portfolio(_lists_to_allocations(column.data.columns, parts)), DailyReturn(
+        ), statistic.SharpeRatio(), Multiply(-1)]).process_column(column).data
