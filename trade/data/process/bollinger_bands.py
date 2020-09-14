@@ -11,7 +11,8 @@ class UpperBollingerBand(column_base.ColumnBase):
 
     def process_column(self, column):
         result_column = Column(column.name)
-        result_column.data = self.ma_p.process_column(column).data + self.ms_p.process_column(column).data * 2
+        result_column.data = self.ma_p.process_column(
+            column).data + self.ms_p.process_column(column).data * 2
         return result_column
 
 
@@ -22,5 +23,6 @@ class LowerBollingerBand(column_base.ColumnBase):
 
     def process_column(self, column):
         result_column = Column(column.name)
-        result_column.data = self.ma_p.process_column(column).data - self.ms_p.process_column(column).data * 2
+        result_column.data = self.ma_p.process_column(
+            column).data - self.ms_p.process_column(column).data * 2
         return result_column

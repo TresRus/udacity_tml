@@ -20,7 +20,7 @@ class TestNormalize(unittest.TestCase):
             (self.stock.column(
                 Column.Name.ADJCLOSE).data.max() /
              self.stock.column(
-                Column.Name.ADJCLOSE).data.ix[0]).tolist())
+                Column.Name.ADJCLOSE).data.iloc[0]).tolist())
 
 
 if __name__ == '__main__':
