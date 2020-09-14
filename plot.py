@@ -33,20 +33,37 @@ def plot_tickers(tickers, baseline, window, start, end):
         tdr = process.Filter([ticker]).process(daily_return)
         btdr = process.Filter([ticker, baseline]).process(daily_return)
 
-        tstock_ma = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(window)), process.MovingAverage(window)]).process(tstock)
-        tstock_mah = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(window/2)), process.MovingAverage(window/2)]).process(tstock)
-        tstock_maq = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(window/4)), process.MovingAverage(window/4)]).process(tstock)
-        tstock_ubb = process.ProcessLine([process.TickerSuffix("_upper_bb({})".format(window)), process.UpperBollingerBand(window)]).process(tstock)
-        tstock_lbb = process.ProcessLine([process.TickerSuffix("_lower_bb({})".format(window)), process.LowerBollingerBand(window)]).process(tstock)
+        tstock_ma = process.ProcessLine([process.TickerSuffix(
+            "_mov_avg({})".format(window)), process.MovingAverage(window)]).process(tstock)
+        tstock_mah = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(
+            window / 2)), process.MovingAverage(window / 2)]).process(tstock)
+        tstock_maq = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(
+            window / 4)), process.MovingAverage(window / 4)]).process(tstock)
+        tstock_ubb = process.ProcessLine([process.TickerSuffix("_upper_bb({})".format(
+            window)), process.UpperBollingerBand(window)]).process(tstock)
+        tstock_lbb = process.ProcessLine([process.TickerSuffix("_lower_bb({})".format(
+            window)), process.LowerBollingerBand(window)]).process(tstock)
 
         tstock_emad = process.Emad(window).process(tstock)
-        tstock_macd = process.ProcessLine([process.TickerSuffix("_macd({})".format(window)), process.ExponentialMovingAverage(window/3)]).process(tstock_emad)
-        tstock_emad = process.TickerSuffix("_emad({})".format(window)).process(tstock_emad)
+        tstock_macd = process.ProcessLine([process.TickerSuffix("_macd({})".format(
+            window)), process.ExponentialMovingAverage(window / 3)]).process(tstock_emad)
+        tstock_emad = process.TickerSuffix(
+            "_emad({})".format(window)).process(tstock_emad)
 
-        stock_bands = process.Tail(window*3).process(process.Merger().process([tstock, tstock_ma, tstock_ubb, tstock_lbb]))
-        stock_avgs = process.Tail(window*3).process(process.Merger().process([tstock, tstock_mah, tstock_maq]))
-        stock_macd = process.Tail(window*3).process(process.Merger().process([tstock_emad, tstock_macd]))
-        short_tdr = process.Tail(window*3).process(tdr)
+        stock_bands = process.Tail(
+            window *
+            3).process(
+            process.Merger().process(
+                [
+                    tstock,
+                    tstock_ma,
+                    tstock_ubb,
+                    tstock_lbb]))
+        stock_avgs = process.Tail(
+            window * 3).process(process.Merger().process([tstock, tstock_mah, tstock_maq]))
+        stock_macd = process.Tail(
+            window * 3).process(process.Merger().process([tstock_emad, tstock_macd]))
+        short_tdr = process.Tail(window * 3).process(tdr)
 
         process.PdfPlot([process.StockPlotter([process.plot.Graph(title="Stock with bands")],
                                               stock_bands),
@@ -78,7 +95,12 @@ def run():
                         help="Evaluation end date")
     args = parser.parse_args()
 
-    plot_tickers(args.tickers, args.baseline, args.window, args.start, args.end)
+    plot_tickers(
+        args.tickers,
+        args.baseline,
+        args.window,
+        args.start,
+        args.end)
 
 
 if __name__ == "__main__":

@@ -154,6 +154,7 @@ def compute_prediction(df, predict):
     dr = df.shift(-predict)
     return dr
 
+
 def prepare_output(df, window, predict):
     pred = compute_prediction(df, predict)
     return pred[window:-predict]
