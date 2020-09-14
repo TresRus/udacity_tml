@@ -3,11 +3,11 @@ import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from trade import utils
 from trade.data import (Column, reader, process)
+import trade.type
 
 
-def plot_tickers(tickers, baseline, start, end):
+def plot_tickers(tickers, baseline, window, start, end):
     dates = pd.date_range(start, end)
     stock = process.ProcessLine([process.FillMissing(), process.Range(dates)]).process(
         reader.CsvReader().read_stock(tickers + [baseline], [Column.Name.ADJCLOSE]))
@@ -33,11 +33,31 @@ def plot_tickers(tickers, baseline, start, end):
         tdr = process.Filter([ticker]).process(daily_return)
         btdr = process.Filter([ticker, baseline]).process(daily_return)
 
-        process.PdfPlot([process.StockPlotter([process.plot.Graph(title="Stock")],
-                                              tstock),
+        tstock_ma = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(window)), process.MovingAverage(window)]).process(tstock)
+        tstock_mah = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(window/2)), process.MovingAverage(window/2)]).process(tstock)
+        tstock_maq = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(window/4)), process.MovingAverage(window/4)]).process(tstock)
+        tstock_ubb = process.ProcessLine([process.TickerSuffix("_upper_bb({})".format(window)), process.UpperBollingerBand(window)]).process(tstock)
+        tstock_lbb = process.ProcessLine([process.TickerSuffix("_lower_bb({})".format(window)), process.LowerBollingerBand(window)]).process(tstock)
+
+        tstock_emad = process.Emad(window).process(tstock)
+        tstock_macd = process.ProcessLine([process.TickerSuffix("_macd({})".format(window)), process.ExponentialMovingAverage(window/3)]).process(tstock_emad)
+        tstock_emad = process.TickerSuffix("_emad({})".format(window)).process(tstock_emad)
+
+        stock_bands = process.Tail(window*3).process(process.Merger().process([tstock, tstock_ma, tstock_ubb, tstock_lbb]))
+        stock_avgs = process.Tail(window*3).process(process.Merger().process([tstock, tstock_mah, tstock_maq]))
+        stock_macd = process.Tail(window*3).process(process.Merger().process([tstock_emad, tstock_macd]))
+        short_tdr = process.Tail(window*3).process(tdr)
+
+        process.PdfPlot([process.StockPlotter([process.plot.Graph(title="Stock with bands")],
+                                              stock_bands),
+                         process.StockPlotter([process.plot.Graph(title="Stock with averages")],
+                                              stock_avgs),
+                         process.StockPlotter([process.plot.Graph(title="Macd")],
+                                              stock_macd),
                          process.StockPlotter([process.plot.Graph(title="Daily returns",
-                                                                  ylabel="Return"),
-                                               process.plot.Histogram()],
+                                                                  ylabel="Return")],
+                                              short_tdr),
+                         process.StockPlotter([process.plot.Histogram()],
                                               tdr),
                          process.StockPlotter([process.plot.Scatter(baseline)],
                                               btdr)],
@@ -50,13 +70,15 @@ def run():
                         help='ticker to include in portfolio')
     parser.add_argument('-b', '--baseline', default="SPY", type=str,
                         help='baseline ticker')
-    parser.add_argument('-s', '--start', required=True, type=utils.date_arg,
+    parser.add_argument('-w', '--window', default=30, type=int,
+                        help='Calculation window')
+    parser.add_argument('-s', '--start', required=True, type=trade.type.date,
                         help="Evaluation start date")
-    parser.add_argument('-e', '--end', required=True, type=utils.date_arg,
+    parser.add_argument('-e', '--end', required=True, type=trade.type.date,
                         help="Evaluation end date")
     args = parser.parse_args()
 
-    plot_tickers(args.tickers, args.baseline, args.start, args.end)
+    plot_tickers(args.tickers, args.baseline, args.window, args.start, args.end)
 
 
 if __name__ == "__main__":
