@@ -23,7 +23,7 @@ def optimize(tickers, baseline, start, end):
             Column.Name.ADJCLOSE))
 
     for allocation in allocations:
-        print allocation
+        print(allocation)
 
     portfolio = process.Portfolio(allocations).process(stock)
     stock = process.Merger().process([stock, portfolio])

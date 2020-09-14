@@ -92,17 +92,17 @@ class Print(object):
     def process(self, stock):
         daily_return = DailyReturn().process(stock)
 
-        print "Cumulative:"
-        print str(Cumulative().process(stock))
-        print "Average:"
-        print str(Average().process(daily_return))
-        print "Risk:"
-        print str(Risk().process(daily_return))
-        print "Sharpe ratio (year):"
-        print str(SharpeRatio().process(daily_return))
-        print "Alpha to SPY:"
-        print str(Alpha('SPY').process(daily_return))
-        print "Beta to SPY:"
-        print str(Beta('SPY').process(daily_return))
-        print "Correlation:"
-        print str(Correlation().process(daily_return))
+        print("Cumulative:")
+        print(str(Cumulative().process(stock)))
+        print("Average:")
+        print(str(Average().process(daily_return)))
+        print("Risk:")
+        print(str(Risk().process(daily_return)))
+        print("Sharpe ratio (year):")
+        print(str(SharpeRatio().process(daily_return)))
+        print("Alpha to SPY:")
+        print(str(Alpha('SPY').process(daily_return)))
+        print("Beta to SPY:")
+        print(str(Beta('SPY').process(daily_return)))
+        print("Correlation:")
+        print(str(Correlation().process(daily_return)))

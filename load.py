@@ -6,7 +6,7 @@ import yfinance as yf
 
 def load_ticker(ticker, dataDir):
     csv = os.path.join(dataDir, "%s.csv" % ticker)
-    print "Download %s to %s" % (ticker, csv)
+    print("Download {} to {}".format(ticker, csv))
     if not os.path.exists(dataDir):
         os.makedirs(dataDir)
 
