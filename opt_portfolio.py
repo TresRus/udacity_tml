@@ -17,7 +17,10 @@ def optimize(tickers, baseline, start, end):
 
     stock = process.Normalize().process(stock)
 
-    allocations = trade.data.optimize.FitLine(trade.data.optimize.ReversSharpeRatio()).run(stock.column(Column.Name.ADJCLOSE))
+    allocations = trade.data.optimize.FitLine(
+        trade.data.optimize.ReversSharpeRatio()).run(
+        stock.column(
+            Column.Name.ADJCLOSE))
 
     for allocation in allocations:
         print allocation
@@ -26,7 +29,9 @@ def optimize(tickers, baseline, start, end):
     stock = process.Merger().process([stock, portfolio])
 
     process.statistic.Print().process(stock)
-    process.ProcessLine([process.Filter([baseline, 'Portfolio']), process.Plot(process.plot.Graph())]).process(stock)
+    process.ProcessLine([process.Filter([baseline, 'Portfolio']), process.Plot(
+        process.plot.Graph())]).process(stock)
+
 
 def run():
     parser = argparse.ArgumentParser(description='Create optimal portfolio.')
