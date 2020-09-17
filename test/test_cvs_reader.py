@@ -1,31 +1,40 @@
 import unittest
 import os
-from trade.data import (Stock, Column)
+from trade.data import (ColumnName)
 from trade.data.reader import (CsvReader)
 
 
-class TestMarket(unittest.TestCase):
+class TestDataset(unittest.TestCase):
     def setUp(self):
         root_dir = os.path.dirname(os.path.realpath(__file__))
         data_dir = os.path.join(root_dir, "data")
         self.reader = CsvReader(data_dir)
 
     def test_read_spy(self):
-        stock = self.reader.read_stock(["SPY"], [Column.Name.ADJCLOSE])
-        self.assertEqual(stock.column(Column.Name.ADJCLOSE).data.shape[0], 50)
+        dataset = self.reader.read_dataset(["SPY"], [ColumnName.ADJCLOSE])
+        self.assertEqual(dataset.column(ColumnName.ADJCLOSE).shape[0], 50)
+        self.assertEqual(dataset.column(ColumnName.ADJCLOSE).shape[1], 1)
 
     def test_read_goog(self):
-        stock = self.reader.read_stock(["GOOG"], [Column.Name.ADJCLOSE])
-        self.assertEqual(stock.column(Column.Name.ADJCLOSE).data.shape[0], 30)
+        dataset = self.reader.read_dataset(["GOOG"], [ColumnName.ADJCLOSE])
+        self.assertEqual(dataset.column(ColumnName.ADJCLOSE).shape[0], 30)
+        self.assertEqual(dataset.column(ColumnName.ADJCLOSE).shape[1], 1)
 
     def test_read_gld(self):
-        stock = self.reader.read_stock(["GLD"], [Column.Name.ADJCLOSE])
-        self.assertEqual(stock.column(Column.Name.ADJCLOSE).data.shape[0], 70)
+        dataset = self.reader.read_dataset(["GLD"], [ColumnName.ADJCLOSE])
+        self.assertEqual(dataset.column(ColumnName.ADJCLOSE).shape[0], 70)
+        self.assertEqual(dataset.column(ColumnName.ADJCLOSE).shape[1], 1)
 
     def test_read_all(self):
-        stock = self.reader.read_stock(
-            ["SPY", "GOOG", "GLD"], [Column.Name.ADJCLOSE])
-        self.assertEqual(stock.column(Column.Name.ADJCLOSE).data.shape[0], 70)
+        dataset = self.reader.read_dataset(
+            ["SPY", "GOOG", "GLD"], [ColumnName.ADJCLOSE])
+        self.assertEqual(dataset.column(ColumnName.ADJCLOSE).shape[0], 70)
+        self.assertEqual(dataset.column(ColumnName.ADJCLOSE).shape[1], 3)
+
+    def test_read_multycol(self):
+        dataset = self.reader.read_dataset(
+            ["SPY"], [ColumnName.CLOSE, ColumnName.ADJCLOSE])
+        self.assertEqual(len(dataset.columns), 2)
 
 
 class TestColumn(unittest.TestCase):
@@ -35,21 +44,25 @@ class TestColumn(unittest.TestCase):
         self.reader = CsvReader(data_dir)
 
     def test_read_spy(self):
-        column = self.reader.read_column(["SPY"], Column.Name.ADJCLOSE)
-        self.assertEqual(column.data.shape[0], 50)
+        df = self.reader.read_column(["SPY"], ColumnName.ADJCLOSE)
+        self.assertEqual(df.shape[0], 50)
+        self.assertEqual(df.shape[1], 1)
 
     def test_read_goog(self):
-        column = self.reader.read_column(["GOOG"], Column.Name.ADJCLOSE)
-        self.assertEqual(column.data.shape[0], 30)
+        df = self.reader.read_column(["GOOG"], ColumnName.ADJCLOSE)
+        self.assertEqual(df.shape[0], 30)
+        self.assertEqual(df.shape[1], 1)
 
     def test_read_gld(self):
-        column = self.reader.read_column(["GLD"], Column.Name.ADJCLOSE)
-        self.assertEqual(column.data.shape[0], 70)
+        df = self.reader.read_column(["GLD"], ColumnName.ADJCLOSE)
+        self.assertEqual(df.shape[0], 70)
+        self.assertEqual(df.shape[1], 1)
 
     def test_read_all(self):
-        column = self.reader.read_column(
-            ["SPY", "GOOG", "GLD"], Column.Name.ADJCLOSE)
-        self.assertEqual(column.data.shape[0], 70)
+        df = self.reader.read_column(
+            ["SPY", "GOOG", "GLD"], ColumnName.ADJCLOSE)
+        self.assertEqual(df.shape[0], 70)
+        self.assertEqual(df.shape[1], 3)
 
 
 if __name__ == '__main__':

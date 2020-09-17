@@ -1,19 +1,10 @@
-from . import column_base
-from trade.data import Column
-
-
-class Allocate(column_base.ColumnBase):
+class Allocate(object):
     def __init__(self, parts):
         self.parts = parts
 
-    def process_column(self, column):
-        if len(self.parts) != len(column.data.columns):
-            raise ValueError(
-                "Column {}: Parts size is not equal to columns size: {} != {}".format(
-                    column.name, len(
-                        self.parts), len(
-                        column.data.columns)))
+    def process(self, df):
+        if len(self.parts) != len(df.columns):
+            raise ValueError("Parts size is not equal to columns size: {} != {}".format(
+                len(self.parts), len(df.columns)))
 
-        result_column = Column(column.name)
-        result_column.data = column.data * self.parts
-        return result_column
+        return df * self.parts

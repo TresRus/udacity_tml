@@ -1,13 +1,8 @@
-from . import column_base
-from trade.data import Column
-
-
-class MovingStd(column_base.ColumnBase):
+class MovingStd(object):
     def __init__(self, window):
-        self.window = window
+        self.window = int(window)
 
-    def process_column(self, column):
-        result_column = Column(column.name)
-        result_column.data = column.data.rolling(self.window).std()
-        result_column.data.iloc[0:self.window, :] = 0
-        return result_column
+    def process(self, df):
+        result_df = df.rolling(self.window).std()
+        result_df.iloc[0:self.window, :] = 0
+        return result_df

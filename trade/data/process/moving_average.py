@@ -1,14 +1,8 @@
-from . import column_base
-from trade.data import Column
-
-
-class MovingAverage(column_base.ColumnBase):
+class MovingAverage(object):
     def __init__(self, window):
         self.window = int(window)
 
-    def process_column(self, column):
-        result_column = Column(column.name)
-        result_column.data = column.data.rolling(self.window).mean()
-        result_column.data.iloc[0:self.window,
-                                :] = column.data.iloc[0:self.window, :]
-        return result_column
+    def process(self, df):
+        result_df = df.rolling(self.window).mean()
+        result_df.iloc[0:self.window, :] = df.iloc[0:self.window, :]
+        return result_df

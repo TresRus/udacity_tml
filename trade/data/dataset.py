@@ -1,8 +1,14 @@
-from trade.data.column import Column
-import trade.data.column
+class ColumnName(object):
+    DATE = "Date"
+    ADJCLOSE = "Adj Close"
+    CLOSE = "Close"
+    HIGH = "High"
+    LOW = "Low"
+    OPEN = "Open"
+    VOLUME = "Volume"
 
 
-class Stock(object):
+class Dataset(object):
     def __init__(self):
         self.columns = {}
 
@@ -14,7 +20,4 @@ class Stock(object):
         return "\n".join(text)
 
     def column(self, name):
-        if name not in self.columns:
-            self.columns[name] = Column(name)
-
         return self.columns[name]
