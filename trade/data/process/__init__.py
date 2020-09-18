@@ -4,10 +4,9 @@ from .bollinger_bands import BollingerBands
 from .daily_return import DailyReturn
 from .exponential_moving_average import ExponentialMovingAverage
 from .fill_missing import FillMissing
-# from .filter import Filter
-# from .line import ProcessLine
+from .filter import Filter
+from .utils import Pipe, Pass, Lambda, Split, Merge
 # from .macd import Macd
-# from .merge import Merger
 # from .momentum import Momentum
 # from .moving_average import MovingAverage
 # from .moving_std import MovingStd

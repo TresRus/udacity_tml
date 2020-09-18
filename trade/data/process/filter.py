@@ -1,18 +1,10 @@
-from . import column_base
-from trade.data import Column
-
-
-class Filter(column_base.ColumnBase):
+class Filter(object):
     def __init__(self, tickers):
         self.tickers = tickers
 
-    def process_column(self, column):
+    def process(self, df):
         for ticker in self.tickers:
-            if ticker not in column.data.columns:
-                raise ValueError(
-                    "No {} ticker in {} column".format(
-                        ticker, column.name))
+            if ticker not in df.columns:
+                raise ValueError("No {} ticker in dataframe".format(ticker))
 
-        result_column = Column(column.name)
-        result_column.data = column.data[self.tickers]
-        return result_column
+        return df[self.tickers]
