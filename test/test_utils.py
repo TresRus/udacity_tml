@@ -2,7 +2,7 @@ import unittest
 import os
 from trade.data import (ColumnName)
 from trade.data.reader import (CsvReader)
-from trade.data.process import (Pipe, Pass, Lambda, Split, Merge)
+from trade.data.process import (Pipe, Pass, Lambda, Parallel, Split, Merge)
 
 
 class TestPass(unittest.TestCase):
@@ -41,6 +41,26 @@ class TestPipe(unittest.TestCase):
         self.assertTrue(
             result_df.iloc[0]["SPY"],
             (self.df.iloc[0]["SPY"] + 1) * 2)
+
+
+class TestParallel(unittest.TestCase):
+    def setUp(self):
+        root_dir = os.path.dirname(os.path.realpath(__file__))
+        data_dir = os.path.join(root_dir, "data")
+        self.dfs = [
+            CsvReader(data_dir).read_column(
+                ["SPY"], ColumnName.ADJCLOSE), CsvReader(data_dir).read_column(
+                ["GOOG"], ColumnName.ADJCLOSE)]
+
+    def test_pass_lambda(self):
+        result = Parallel(
+            Pass(),
+            Lambda(lambda x: x * 2)
+        ).process(*self.dfs)
+        self.assertTrue(result[0].iloc[0]["SPY"], self.dfs[0].iloc[0]["SPY"])
+        self.assertTrue(
+            result[1].iloc[0]["GOOG"],
+            self.dfs[1].iloc[0]["GOOG"] * 2)
 
 
 class TestSplit(unittest.TestCase):

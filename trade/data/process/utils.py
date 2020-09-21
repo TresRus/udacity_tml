@@ -25,12 +25,26 @@ class Lambda(object):
         return self.function(df)
 
 
+class Parallel(object):
+    def __init__(self, *args):
+        self.processors = args
+
+    def process(self, *dfs):
+        if len(self.processors) != len(dfs):
+            raise ValueError("Number of processors is not equal to number of dataframes size: {} != {}".format(
+                len(self.processors), len(dfs)))
+
+        return tuple([processor.process(df)
+                      for df, processor in zip(dfs, self.processors)])
+
+
 class Split(object):
     def __init__(self, *args):
         self.processors = args
 
     def process(self, df):
-        return tuple([processor.process(df) for processor in self.processors])
+        return Parallel(*self.processors).process(*
+                                                  ([df] * len(self.processors)))
 
 
 class Merge(object):

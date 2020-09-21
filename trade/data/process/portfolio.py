@@ -1,5 +1,7 @@
-from trade.data import Column
-from trade.data.process import (ProcessLine, Filter, Allocate, Multiply, Sum)
+from .allocate import Allocate
+from .filter import Filter
+from .utils import Pipe, Lambda
+from .sum import Sum
 
 
 class Portfolio(object):
@@ -9,11 +11,15 @@ class Portfolio(object):
         total = sum(self.parts)
         self.parts = [float(part) / total for part in self.parts]
         self.total_cost = total_cost
-        self.line = ProcessLine([Filter(self.tickers), Allocate(
-            self.parts), Multiply(self.total_cost), Sum("Portfolio")])
+        self.processor = Pipe(
+            Filter(
+                self.tickers), Allocate(
+                self.parts), Lambda(
+                lambda df: df * self.total_cost), Sum("Portfolio"))
 
-    def process_column(self, column):
-        return self.line.process_column(column)
-
-    def process(self, stock):
-        return self.line.process(stock)
+    def process(self, df):
+        for ticker in self.tickers:
+            if ticker not in df.columns:
+                raise ValueError(
+                    "Ticker {} is not presented in dataframe".format(ticker))
+        return self.processor.process(df)
