@@ -1,13 +1,9 @@
-from . import column_base
-from trade.data import Column
-
-
-class RelativeStrength(column_base.ColumnBase):
+class RelativeStrength(object):
     def __init__(self, window):
         self.window = window
 
-    def process_column(self, column):
-        delta = column.data.diff()
+    def process(self, df):
+        delta = df.diff()
 
         up = delta.copy()
         up[up < 0] = 0
@@ -17,18 +13,14 @@ class RelativeStrength(column_base.ColumnBase):
         down[down > 0] = 0
         down = down.ewm(span=self.window).mean().abs()
 
-        result_column = Column(column.name)
-        result_column.data = up / down
-        result_column.data.fillna(method='ffill', inplace=True)
-        return result_column
+        result_df = up / down
+        result_df.fillna(method='ffill', inplace=True)
+        return result_df
 
 
-class RelativeStrengthIndex(column_base.ColumnBase):
+class RelativeStrengthIndex(object):
     def __init__(self, window):
-        self.rs_p = RelativeStrength(window)
+        self.window = window
 
-    def process_column(self, column):
-        result_column = Column(column.name)
-        result_column.data = 100 - 100 / \
-            (1 + self.rs_p.process_column(column).data)
-        return result_column
+    def process(self, df):
+        return 100 - 100 / (1 + RelativeStrength(self.window).process(df))

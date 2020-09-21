@@ -1,91 +1,73 @@
 import math
 import pandas as pd
-from . import column_base
 from trade import utils
-from trade.data import Column
-from trade.data.process import DailyReturn
+from .daily_return import DailyReturn
 
 
-class Cumulative(column_base.ColumnBase):
-    def process_column(self, column):
-        result_column = Column(column.name)
-        result_column.data = column.data.ix[-1] - column.data.ix[0]
-        return result_column
+class Cumulative(object):
+    def process(self, df):
+        return df.iloc[-1] - df.iloc[0]
 
 
-class Average(column_base.ColumnBase):
-    def process_column(self, column):
-        result_column = Column(column.name)
-        result_column.data = column.data.mean()
-        return result_column
+class Average(object):
+    def process(self, df):
+        return df.mean()
 
 
-class Risk(column_base.ColumnBase):
-    def process_column(self, column):
-        result_column = Column(column.name)
-        result_column.data = column.data.std()
-        return result_column
+class Risk(object):
+    def process(self, df):
+        return df.std()
 
 
-class SharpeRatio(column_base.ColumnBase):
+class SharpeRatio(object):
     def __init__(self, risk_free=0.00, days=252):
         self.daily_free_risk = ((1.0 + risk_free) ** (1 / 252) - 1.0)
         self.days = 252
 
-    def process_column(self, column):
-        result_column = Column(column.name)
-        result_column.data = (column.data.mean(
-        ) - self.daily_free_risk) / column.data.std() * math.sqrt(self.days)
-        return result_column
+    def process(self, df):
+        return (df.mean() - self.daily_free_risk) / \
+            df.std() * math.sqrt(self.days)
 
 
-class Alpha(column_base.ColumnBase):
+class Alpha(object):
     def __init__(self, ticker):
         self.ticker = ticker
 
-    def process_column(self, column):
-        if self.ticker not in column.data.columns:
+    def process(self, df):
+        if self.ticker not in df.columns:
             raise ValueError(
-                "No {} ticker in {} column".format(
-                    self.ticker, column.name))
+                "No {} ticker in dataframe".format(self.ticker))
 
-        result_column = Column(column.name)
         data = []
         learner = utils.LinRegLearner()
-        for ticker in column.data.columns:
-            learner.train(column.data[self.ticker], column.data[ticker])
+        for ticker in df.columns:
+            learner.train(df[self.ticker], df[ticker])
             data.append(learner.b)
 
-        result_column = pd.Series(data, index=column.data.columns.tolist())
-        return result_column
+        return pd.Series(data, index=df.columns.tolist())
 
 
-class Beta(column_base.ColumnBase):
+class Beta(object):
     def __init__(self, ticker):
         self.ticker = ticker
 
-    def process_column(self, column):
-        if self.ticker not in column.data.columns:
+    def process(self, df):
+        if self.ticker not in df.columns:
             raise ValueError(
-                "No {} ticker in {} column".format(
-                    self.ticker, column.name))
+                "No {} ticker in dataframe".format(self.ticker))
 
-        result_column = Column(column.name)
         data = []
         learner = utils.LinRegLearner()
-        for ticker in column.data.columns:
-            learner.train(column.data[self.ticker], column.data[ticker])
+        for ticker in df.columns:
+            learner.train(df[self.ticker], df[ticker])
             data.append(learner.m)
 
-        result_column = pd.Series(data, index=column.data.columns.tolist())
-        return result_column
+        return pd.Series(data, index=df.columns.tolist())
 
 
-class Correlation(column_base.ColumnBase):
-    def process_column(self, column):
-        result_column = Column(column.name)
-        result_column.data = column.data.corr(method='pearson')
-        return result_column
+class Correlation(object):
+    def process(self, df):
+        return df.corr(method='pearson')
 
 
 class Print(object):

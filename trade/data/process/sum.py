@@ -1,14 +1,9 @@
-from . import column_base
-from trade.data import Column
-
-
-class Sum(column_base.ColumnBase):
+class Sum(object):
     def __init__(self, name):
         self.name = name
 
-    def process_column(self, column):
-        result_column = Column(column.name)
-        result_column.data = column.data.sum(axis=1)
-        result_column.data.name = "Portfolio"
-        result_column.data = result_column.data.to_frame()
-        return result_column
+    def process(self, df):
+        result_df = df.sum(axis=1)
+        result_df.name = self.name
+        result_df = result_df.to_frame()
+        return result_df

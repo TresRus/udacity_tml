@@ -1,15 +1,9 @@
-from . import column_base
-from trade.data import Column
-
-
-class TickerSuffix(column_base.ColumnBase):
+class TickerSuffix(object):
     def __init__(self, suffix):
         self.suffix = suffix
 
-    def process_column(self, column):
+    def process(self, df):
         renames = {}
-        for name in column.data.columns:
+        for name in df.columns:
             renames[name] = "{}{}".format(name, self.suffix)
-        result_column = Column(column.name)
-        result_column.data = column.data.rename(columns=renames)
-        return result_column
+        return df.rename(columns=renames)

@@ -1,4 +1,3 @@
-from . import column_base
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
@@ -19,28 +18,29 @@ class _PdfPresent(object):
         plt.close()
 
 
-class Plot(column_base.ColumnBase):
-    def __init__(self, plotter):
+class Plot(object):
+    def __init__(self, plotter, name="Stock"):
         self.plotter = plotter
+        self.name = name
 
-    def process_column(self, column):
-        self.plotter.plot(column.name, column.data)
+    def process(self, df):
+        self.plotter.plot(self.name, df)
 
 
-class StockPlotter(object):
-    def __init__(self, plotters, stock):
+class DfPlotter(object):
+    def __init__(self, df, *plotters):
+        self.df = df
         self.plotters = plotters
-        self.stock = stock
 
     def plot(self, present):
         for plotter in self.plotters:
             plotter.set_present(present)
-            Plot(plotter).process(self.stock)
+            Plot(plotter).process(self.df)
 
 
-class ScreenPlot(column_base.ColumnBase):
-    def __init__(self, plotters):
-        self.plotters = plotters
+class ScreenPlot(object):
+    def __init__(self, plotter):
+        self.plotter = plotter
 
     def plot(self):
         for plotter in self.plotters:
@@ -48,9 +48,9 @@ class ScreenPlot(column_base.ColumnBase):
 
 
 class PdfPlot(object):
-    def __init__(self, plotters, plot_path):
-        self.plotters = plotters
+    def __init__(self, plot_path, *plotters):
         self.plot_path = plot_path
+        self.plotters = plotters
 
     def plot(self):
         with PdfPages(self.plot_path) as pdf:
