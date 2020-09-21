@@ -54,8 +54,7 @@ class Beta(object):
     def process(self, df):
         if self.ticker not in df.columns:
             raise ValueError(
-                "No {} ticker in {} column".format(
-                    self.ticker, column.name))
+                "No {} ticker in dataframe".format(self.ticker))
 
         data = []
         learner = utils.LinRegLearner()
