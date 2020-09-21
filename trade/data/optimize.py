@@ -1,12 +1,8 @@
 import numpy as np
 import scipy.optimize as spo
 from trade.type import Allocation
-from trade.data.process import (
-    ProcessLine,
-    DailyReturn,
-    Portfolio,
-    Multiply,
-    statistic)
+from trade.data.process import (Pipe, Portfolio, DailyReturn, Lambda)
+from trade.data.process.statistic import (SharpeRatio)
 
 
 def _sum_one(allocates):
@@ -21,8 +17,8 @@ class FitLine(object):
     def __init__(self, error_function):
         self.error_function = error_function
 
-    def run(self, column):
-        tickers_number = column.data.shape[1]
+    def run(self, df):
+        tickers_number = df.shape[1]
         allocations = np.ones(tickers_number) / tickers_number
         limits = ()
         for x in range(tickers_number):
@@ -30,13 +26,17 @@ class FitLine(object):
 
         constr = {'type': 'eq', 'fun': _sum_one}
 
-        result = spo.minimize(self.error_function, allocations, args=(column,),
+        result = spo.minimize(self.error_function, allocations, args=(df,),
                               method='SLSQP', bounds=limits,
                               constraints=constr, options={'disp': True})
-        return _lists_to_allocations(column.data.columns, result.x)
+        return _lists_to_allocations(df.columns, result.x)
 
 
 class ReversSharpeRatio(object):
-    def __call__(self, parts, column):
-        return ProcessLine([Portfolio(_lists_to_allocations(column.data.columns, parts)), DailyReturn(
-        ), statistic.SharpeRatio(), Multiply(-1)]).process_column(column).data
+    def __call__(self, parts, df):
+        return Pipe(
+            Portfolio(_lists_to_allocations(df.columns, parts)),
+            DailyReturn(),
+            SharpeRatio(),
+            Lambda(lambda x: x * -1)
+        ).process(df)

@@ -56,7 +56,7 @@ class TestParallel(unittest.TestCase):
         result = Parallel(
             Pass(),
             Lambda(lambda x: x * 2)
-        ).process(*self.dfs)
+        ).process(self.dfs)
         self.assertTrue(result[0].iloc[0]["SPY"], self.dfs[0].iloc[0]["SPY"])
         self.assertTrue(
             result[1].iloc[0]["GOOG"],

@@ -1,18 +1,23 @@
 import os
 import argparse
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from trade.data import (Column, reader, process)
+from trade.data import (ColumnName, reader, process)
+from trade.data.process import (plot)
 import trade.type
 
 
 def plot_tickers(tickers, baseline, window, start, end):
     dates = pd.date_range(start, end)
-    stock = process.ProcessLine([process.FillMissing(), process.Range(dates)]).process(
-        reader.CsvReader().read_stock(tickers + [baseline], [Column.Name.ADJCLOSE]))
-    normalized_stock = process.Normalize().process(stock)
-    daily_return = process.DailyReturn().process(stock)
+
+    data, norm_data, daily_return = process.Pipe(
+        process.FillMissing(),
+        process.Range(dates),
+        process.Split(
+            process.Pass(),
+            process.Normalize(),
+            process.DailyReturn()
+        )
+    ).process(reader.CsvReader().read_column(tickers + [baseline], ColumnName.ADJCLOSE))
 
     root_dir = os.path.dirname(os.path.realpath(__file__))
     plot_dir = os.path.join(root_dir, "plots")
@@ -20,69 +25,85 @@ def plot_tickers(tickers, baseline, window, start, end):
         os.makedirs(plot_dir)
 
     plot_path = os.path.join(plot_dir, "Market.pdf")
-    process.PdfPlot([process.StockPlotter([process.plot.Graph()],
-                                          normalized_stock),
-                     process.StockPlotter([process.plot.Histogram(baseline=baseline)],
-                                          daily_return)],
-                    plot_path).plot()
+    plot.PdfPlot(plot_path,
+        plot.DfPlotter(norm_data, plot.Graph()),
+        plot.DfPlotter(daily_return, plot.Histogram(baseline=baseline))
+    ).plot()
 
     for ticker in tickers:
         plot_path = os.path.join(plot_dir, "{}.pdf".format(ticker))
 
-        tstock = process.Filter([ticker]).process(stock)
-        tdr = process.Filter([ticker]).process(daily_return)
-        btdr = process.Filter([ticker, baseline]).process(daily_return)
 
-        tstock_ma = process.ProcessLine([process.TickerSuffix(
-            "_mov_avg({})".format(window)), process.MovingAverage(window)]).process(tstock)
-        tstock_mah = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(
-            window / 2)), process.MovingAverage(window / 2)]).process(tstock)
-        tstock_maq = process.ProcessLine([process.TickerSuffix("_mov_avg({})".format(
-            window / 4)), process.MovingAverage(window / 4)]).process(tstock)
-        tstock_ubb = process.ProcessLine([process.TickerSuffix("_upper_bb({})".format(
-            window)), process.UpperBollingerBand(window)]).process(tstock)
-        tstock_lbb = process.ProcessLine([process.TickerSuffix("_lower_bb({})".format(
-            window)), process.LowerBollingerBand(window)]).process(tstock)
+        t_data, t_daily_return, tb_daily_return = process.Parallel(
+            process.Filter([ticker]),
+            process.Filter([ticker]),
+            process.Filter([ticker, baseline])
+        ).process([data, daily_return, daily_return])
 
-        tstock_emad = process.Emad(window).process(tstock)
-        tstock_macd = process.ProcessLine([process.TickerSuffix("_macd({})".format(
-            window)), process.ExponentialMovingAverage(window / 3)]).process(tstock_emad)
-        tstock_emad = process.TickerSuffix(
-            "_emad({})".format(window)).process(tstock_emad)
+        bands = process.Pipe(
+            process.Split(
+                process.Pass(),
+                process.Pipe(
+                    process.TickerSuffix("_mov_avg({})".format(window)),
+                    process.MovingAverage(window)
+                ),
+                process.Pipe(
+                    process.BollingerBands(window),
+                    process.Parallel(
+                        process.TickerSuffix("_upper_bb({})".format(window)),
+                        process.TickerSuffix("_lower_bb({})".format(window))
+                    ),
+                    process.Merge()
+                )
+            ),
+            process.Merge(),
+            process.Tail(window * 3)
+        ).process(t_data)
 
-        stock_bands = process.Tail(
-            window *
-            3).process(
-            process.Merger().process(
-                [
-                    tstock,
-                    tstock_ma,
-                    tstock_ubb,
-                    tstock_lbb]))
-        stock_avgs = process.Tail(
-            window * 3).process(process.Merger().process([tstock, tstock_mah, tstock_maq]))
-        stock_macd = process.Tail(
-            window * 3).process(process.Merger().process([tstock_emad, tstock_macd]))
-        short_tdr = process.Tail(window * 3).process(tdr)
-        stock_rsi = process.ProcessLine([process.TickerSuffix("_rsi({})".format(
-            window)), process.RelativeStrengthIndex(window), process.Tail(window * 3)]).process(tstock)
+        avgs = process.Pipe(
+            process.Split(
+                process.Pass(),
+                process.Pipe(
+                    process.TickerSuffix("_mov_avg({})".format(window / 2)),
+                    process.MovingAverage(window / 2)
+                ),
+                process.Pipe(
+                    process.TickerSuffix("_mov_avg({})".format(window / 4)),
+                    process.MovingAverage(window / 4)
+                )
+            ),
+            process.Merge(),
+            process.Tail(window * 3)
+        ).process(t_data)
 
-        process.PdfPlot([process.StockPlotter([process.plot.Graph(title="Stock with bands")],
-                                              stock_bands),
-                         process.StockPlotter([process.plot.Graph(title="Stock with averages")],
-                                              stock_avgs),
-                         process.StockPlotter([process.plot.Graph(title="MACD")],
-                                              stock_macd),
-                         process.StockPlotter([process.plot.Graph(title="RSI")],
-                                              stock_rsi),
-                         process.StockPlotter([process.plot.Graph(title="Daily returns",
-                                                                  ylabel="Return")],
-                                              short_tdr),
-                         process.StockPlotter([process.plot.Histogram()],
-                                              tdr),
-                         process.StockPlotter([process.plot.Scatter(baseline)],
-                                              btdr)],
-                        plot_path).plot()
+        macd = process.Pipe(
+            process.Macd(window),
+            process.Parallel(
+                process.TickerSuffix("_emad({})".format(window)),
+                process.TickerSuffix("_macd({})".format(window))
+            ),
+            process.Merge(),
+            process.Tail(window * 3)
+        ).process(t_data)
+
+        rsi = process.Pipe(
+            process.RelativeStrengthIndex(window),
+            process.TickerSuffix("_rsi({})".format(window)),
+            process.Merge(),
+            process.Tail(window * 3)
+        ).process(t_data)
+
+        st_daily_return = process.Tail(window * 3).process(t_daily_return)
+
+        plot.PdfPlot(plot_path,
+            plot.DfPlotter(bands, plot.Graph(title="Stock with bands")),
+            plot.DfPlotter(avgs, plot.Graph(title="Stock with averages")),
+            plot.DfPlotter(macd, plot.Graph(title="MACD")),
+            plot.DfPlotter(rsi, plot.Graph(title="RSI")),
+            plot.DfPlotter(st_daily_return, plot.Graph(title="Daily return", ylabel="Return")),
+            plot.DfPlotter(t_daily_return, plot.Histogram()),
+            plot.DfPlotter(tb_daily_return, plot.Scatter(baseline))
+        ).plot()
 
 
 def run():

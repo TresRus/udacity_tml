@@ -17,4 +17,3 @@ from .sum import Sum
 from .tail import Tail
 from .ticker_suffix import TickerSuffix
 from .utils import Pipe, Pass, Lambda, Parallel, Split, Merge
-# from .plot import Plot, ScreenPlot, PdfPlot, StockPlotter

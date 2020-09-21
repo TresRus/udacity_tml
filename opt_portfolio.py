@@ -1,8 +1,8 @@
 import os
 import argparse
 import pandas as pd
-from trade import utils
-from trade.data import (Column, reader, process)
+from trade.data import (ColumnName, reader, process)
+from trade.data.process import plot
 import trade.type
 import trade.data.optimize
 
@@ -12,25 +12,31 @@ def optimize(tickers, baseline, start, end):
         tickers += [baseline]
 
     dates = pd.date_range(start, end)
-    stock = process.ProcessLine([process.Baseline(baseline), process.FillMissing(), process.Range(
-        dates)]).process(reader.CsvReader().read_stock(tickers, [Column.Name.ADJCLOSE]))
-
-    stock = process.Normalize().process(stock)
-
+    data = process.Pipe(
+        process.Baseline(baseline),
+        process.FillMissing(),
+        process.Range(dates),
+        process.Normalize(),
+    ).process(reader.CsvReader().read_column(tickers, ColumnName.ADJCLOSE))
     allocations = trade.data.optimize.FitLine(
-        trade.data.optimize.ReversSharpeRatio()).run(
-        stock.column(
-            Column.Name.ADJCLOSE))
+        trade.data.optimize.ReversSharpeRatio()).run(data)
 
     for allocation in allocations:
         print(allocation)
 
-    portfolio = process.Portfolio(allocations).process(stock)
-    stock = process.Merger().process([stock, portfolio])
+    data = process.Pipe(
+        process.Split(
+            process.Pass(),
+            process.Portfolio(allocations)
+        ),
+        process.Merge()
+    ).process(data)
 
-    process.statistic.Print().process(stock)
-    process.ProcessLine([process.Filter([baseline, 'Portfolio']), process.Plot(
-        process.plot.Graph())]).process(stock)
+    process.statistic.Print().process(data)
+    process.Pipe(
+        process.Filter([baseline, 'Portfolio']),
+        plot.Plot(plot.Graph())
+    ).process(data)
 
 
 def run():

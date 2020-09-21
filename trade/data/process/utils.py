@@ -29,7 +29,7 @@ class Parallel(object):
     def __init__(self, *args):
         self.processors = args
 
-    def process(self, *dfs):
+    def process(self, dfs):
         if len(self.processors) != len(dfs):
             raise ValueError("Number of processors is not equal to number of dataframes size: {} != {}".format(
                 len(self.processors), len(dfs)))
@@ -43,8 +43,7 @@ class Split(object):
         self.processors = args
 
     def process(self, df):
-        return Parallel(*self.processors).process(*
-                                                  ([df] * len(self.processors)))
+        return Parallel(*self.processors).process([df] * len(self.processors))
 
 
 class Merge(object):

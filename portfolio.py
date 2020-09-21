@@ -1,8 +1,8 @@
 import os
 import argparse
 import pandas as pd
-from trade import utils
-from trade.data import (Column, reader, process)
+from trade.data import (ColumnName, reader, process)
+from trade.data.process import (statistic, plot)
 import trade.type
 
 
@@ -11,15 +11,20 @@ def portfolio(allocations, baseline, start, end):
     tickers = [allocation.ticker for allocation in allocations]
     dates = pd.date_range(start, end)
 
-    stock = process.ProcessLine([process.Baseline(baseline), process.FillMissing(), process.Range(
-        dates)]).process(reader.CsvReader().read_stock(tickers, [Column.Name.ADJCLOSE]))
+    data = process.Pipe(
+        process.Baseline(baseline),
+        process.FillMissing(),
+        process.Range(dates),
+        process.Normalize(),
+        process.Split(
+            process.Portfolio(allocations),
+            process.Pass()
+        ),
+        process.Merge()
+    ).process(reader.CsvReader().read_column(tickers, ColumnName.ADJCLOSE))
 
-    stock = process.Normalize().process(stock)
-    portfolio = process.Portfolio(allocations).process(stock)
-    stock = process.Merger().process([stock, portfolio])
-
-    process.statistic.Print().process(stock)
-    process.Plot(process.plot.Graph()).process(stock)
+    statistic.Print().process(data)
+    plot.Plot(plot.Graph()).process(data)
 
 
 def run():
