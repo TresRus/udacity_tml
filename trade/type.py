@@ -13,7 +13,7 @@ class Allocation(object):
     @staticmethod
     def argparse(value):
         parts = value.split(":")
-        if len(parts) != 2 or int(parts[1]) <= 0:
+        if len(parts) != 2:
             raise argparse.ArgumentTypeError(
                 "Invalide format: {}. Allocator should have format: <ticker>:<number> (example: SPY:40)".format(value))
         return Allocation(parts[0], int(parts[1]))

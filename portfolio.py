@@ -7,18 +7,19 @@ import trade.type
 
 
 def portfolio(allocations, baseline, start, end):
-    """Function called by Test Run."""
     tickers = [allocation.ticker for allocation in allocations]
     dates = pd.date_range(start, end)
+    
+    for allocation in allocations:
+        print(allocation)
 
     data = process.Pipe(
         process.Baseline(baseline),
         process.FillMissing(),
         process.Range(dates),
-        process.Normalize(),
         process.Split(
             process.Portfolio(allocations),
-            process.Pass()
+            process.Normalize(),
         ),
         process.Merge()
     ).process(reader.CsvReader().read_column(tickers, ColumnName.ADJCLOSE))
