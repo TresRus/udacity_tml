@@ -16,25 +16,39 @@ def optimize(tickers, baseline, start, end):
         process.Baseline(baseline),
         process.FillMissing(),
         process.Range(dates),
-        process.Normalize(),
     ).process(reader.CsvReader().read_column(tickers, ColumnName.ADJCLOSE))
-    allocations = trade.data.optimize.FitLine(
+    allocations_sr = trade.data.optimize.FitLine(
         trade.data.optimize.ReversSharpeRatio()).run(data)
 
-    for allocation in allocations:
+    print("Risk and return optimized")
+    for allocation in allocations_sr:
+        print(allocation)
+
+    allocations_mm = trade.data.optimize.FitLine(
+        trade.data.optimize.MinimalMarket(baseline)).run(data)
+
+    print("Minimal market influence")
+    for allocation in allocations_mm:
         print(allocation)
 
     data = process.Pipe(
         process.Split(
-            process.Pass(),
-            process.Portfolio(allocations)
+            process.Normalize(),
+            process.Pipe(
+                process.Portfolio(allocations_sr),
+                process.TickerSuffix("_sr")
+            ),
+            process.Pipe(
+                process.Portfolio(allocations_mm),
+                process.TickerSuffix("_mm")
+            )
         ),
         process.Merge()
     ).process(data)
 
     process.statistic.Print().process(data)
     process.Pipe(
-        process.Filter([baseline, 'Portfolio']),
+        process.Filter([baseline, 'Portfolio_sr', 'Portfolio_mm']),
         plot.Plot(plot.Graph())
     ).process(data)
 

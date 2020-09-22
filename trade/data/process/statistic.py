@@ -1,7 +1,7 @@
 import math
 import pandas as pd
 from trade import utils
-from .daily_return import DailyReturn
+from .returns import DailyReturn
 
 
 class Cumulative(object):

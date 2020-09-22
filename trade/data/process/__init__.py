@@ -1,7 +1,6 @@
 from .allocate import Allocate
 from .baseline import Baseline
 from .bollinger_bands import BollingerBands
-from .daily_return import DailyReturn
 from .exponential_moving_average import ExponentialMovingAverage
 from .fill_missing import FillMissing
 from .filter import Filter
@@ -13,6 +12,7 @@ from .normalize import Normalize
 from .portfolio import Portfolio
 from .range import Range
 from .relative_strength import RelativeStrength, RelativeStrengthIndex
+from .returns import DailyReturn, CumulativeReturn, ReverseCumulativeReturn
 from .sum import Sum
 from .tail import Tail
 from .ticker_suffix import TickerSuffix
