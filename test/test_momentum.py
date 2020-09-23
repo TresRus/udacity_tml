@@ -12,10 +12,10 @@ class TestMomentum(unittest.TestCase):
         self.df = CsvReader(data_dir).read_column(["SPY"], ColumnName.ADJCLOSE)
 
     def test_normal(self):
-        daily_return_df = Momentum(10).process(self.df)
+        momentum = Momentum(10).process(self.df)
         self.assertEqual(
-            daily_return_df.iloc[10]["SPY"],
-            self.df.iloc[10]["SPY"] -
+            momentum.iloc[10]["SPY"],
+            self.df.iloc[10]["SPY"] /
             self.df.iloc[0]["SPY"])
 
 

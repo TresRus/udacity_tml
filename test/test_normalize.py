@@ -2,7 +2,7 @@ import unittest
 import os
 from trade.data import (ColumnName)
 from trade.data.reader import (CsvReader)
-from trade.data.process import (Normalize)
+from trade.data.process import (Normalize, NormalizeIndicator)
 
 
 class TestNormalize(unittest.TestCase):
@@ -17,6 +17,12 @@ class TestNormalize(unittest.TestCase):
         self.assertEqual(
             normalized_df.max().tolist(),
             (self.df.max() / self.df.iloc[0]).tolist())
+
+    def test_indicator(self):
+        normalized_df = NormalizeIndicator().process(self.df)
+        self.assertEqual(
+            normalized_df.max().tolist(),
+            ((self.df.max() - self.df.mean()) / self.df.std()).tolist())
 
 
 if __name__ == '__main__':
