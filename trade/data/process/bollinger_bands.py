@@ -10,3 +10,12 @@ class BollingerBands(object):
         ma_df = MovingAverage(self.window).process(df)
         ms_df = MovingStd(self.window).process(df)
         return (ma_df + ms_df * 2, ma_df - ms_df * 2)
+
+
+class BB(object):
+    def __init__(self, window):
+        self.window = int(window)
+
+    def process(self, df):
+        return (df - MovingAverage(self.window).process(df)) / \
+            (2 * MovingStd(self.window).process(df))
