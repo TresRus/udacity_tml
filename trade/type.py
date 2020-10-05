@@ -19,6 +19,19 @@ class Allocation(object):
         return Allocation(parts[0], int(parts[1]))
 
 
+class AllocationSet(object):
+    def __init__(self, allocations):
+        self.data = {}
+        for allocation in allocations:
+            self.data[allocation.ticker] = int(allocation.number)
+
+    def get_list(self):
+        return [Allocation(ticker, number) for ticker, number in self.data.items()]
+
+    def __str__(self):
+        return "\n".join([str(a) for a in self.get_list()])
+
+
 def date(value):
     try:
         return datetime.datetime.strptime(value, "%Y-%m-%d")

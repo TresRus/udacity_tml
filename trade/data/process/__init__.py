@@ -9,7 +9,7 @@ from .momentum import Momentum
 from .moving_average import MovingAverage
 from .moving_std import MovingStd
 from .normalize import Normalize, NormalizeIndicator
-from .portfolio import Portfolio
+from .portfolio import Portfolio, PortfolioSet
 from .range import Range
 from .relative_strength import RelativeStrength, RelativeStrengthIndex
 from .returns import DailyReturn, CumulativeReturn, ReverseCumulativeReturn

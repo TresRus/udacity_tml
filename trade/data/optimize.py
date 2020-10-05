@@ -14,15 +14,19 @@ def _lists_to_allocations(columns, parts):
 
 
 class FitLine(object):
-    def __init__(self, error_function):
+    def __init__(self, error_function, short=False):
         self.error_function = error_function
+        self.short = short
 
     def run(self, df):
         tickers_number = df.shape[1]
         allocations = np.ones(tickers_number) / tickers_number
         limits = ()
         for x in range(tickers_number):
-            limits += ((-1.0, 1.0),)
+            if self.short:
+                limits += ((-1.0, 1.0),)
+            else:
+                limits += ((0.0, 1.0),)
 
         constr = {'type': 'eq', 'fun': _sum_one}
 

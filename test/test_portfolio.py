@@ -1,9 +1,9 @@
 import unittest
 import os
-from trade.type import (Allocation)
+from trade.type import (Allocation, AllocationSet)
 from trade.data import (ColumnName)
 from trade.data.reader import (CsvReader)
-from trade.data.process import (Portfolio)
+from trade.data.process import (Portfolio, PortfolioSet)
 
 
 class TestPortfolio(unittest.TestCase):
@@ -45,6 +45,19 @@ class TestPortfolio(unittest.TestCase):
                 "GLD", 30)]
         with self.assertRaises(ValueError) as context:
             Portfolio(allocations).process(self.df)
+
+class TestPortfolioSet(unittest.TestCase):
+    def setUp(self):
+        root_dir = os.path.dirname(os.path.realpath(__file__))
+        data_dir = os.path.join(root_dir, "data")
+        self.df = CsvReader(data_dir).read_column(
+            ["SPY", "GOOG"], ColumnName.ADJCLOSE)
+
+    def test_normal(self):
+        allocations = [Allocation("SPY", 30), Allocation("GOOG", 70)]
+        portfolio_set = PortfolioSet(allocations, 20000).process(self.df)
+        self.assertEqual(portfolio_set.data["SPY"], 17)
+        self.assertEqual(portfolio_set.data["GOOG"], 8)
 
 
 if __name__ == '__main__':
