@@ -6,7 +6,7 @@ from trade.data.process import (statistic, plot)
 import trade.type
 
 
-def portfolio(allocations, baseline, start, end):
+def portfolio(allocations, baseline, start, end, stat):
     tickers = [allocation.ticker for allocation in allocations]
     dates = pd.date_range(start, end)
     
@@ -16,16 +16,16 @@ def portfolio(allocations, baseline, start, end):
     data = process.Pipe(
         process.Baseline(baseline),
         process.FillMissing(),
-        process.Range(dates),
-        process.Split(
-            process.Portfolio(allocations),
-            process.Normalize(),
-        ),
-        process.Merge()
+        process.Range(dates)
     ).process(reader.CsvReader().read_column(tickers, ColumnName.ADJCLOSE))
 
-    statistic.Print().process(data)
-    plot.Plot(plot.Graph()).process(data)
+    port_data = process.PortfolioSetValue(
+        trade.type.AllocationSet(allocations)
+    ).process(data)
+
+    if stat:
+        statistic.Print().process(port_data)
+    plot.Plot(plot.Graph()).process(port_data)
 
 
 def run():
@@ -42,9 +42,11 @@ def run():
                         help="Evaluation start date")
     parser.add_argument('-e', '--end', required=True, type=trade.type.date,
                         help="Evaluation end date")
+    parser.add_argument('--stat', action='store_true',
+                        help="Show statistics")
     args = parser.parse_args()
 
-    portfolio(args.allocations, args.baseline, args.start, args.end)
+    portfolio(args.allocations, args.baseline, args.start, args.end, args.stat)
 
 
 if __name__ == "__main__":
