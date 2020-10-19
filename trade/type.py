@@ -23,7 +23,7 @@ class AllocationSet(object):
     def __init__(self, allocations):
         self.data = {}
         for allocation in allocations:
-            self.data[allocation.ticker] = int(allocation.number)
+            self.data[allocation.ticker] = allocation.number
 
     def get_list(self):
         return [Allocation(ticker, number) for ticker, number in self.data.items()]

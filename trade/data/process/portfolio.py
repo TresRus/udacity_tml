@@ -42,8 +42,27 @@ class PortfolioSet(object):
             Filter(self.tickers),
             Lambda(lambda df: self.costs / df.iloc[-1]),
             Lambda(lambda s: AllocationSet(
-                    [Allocation(ticker, number) for ticker, number in s.items()]
+                    [Allocation(ticker, int(number)) for ticker, number in s.items()]
                   ))
+        )
+
+    def process(self, df):
+        for ticker in self.tickers:
+            if ticker not in df.columns:
+                raise ValueError(
+                    "Ticker {} is not presented in dataframe".format(ticker))
+        return self.processor.process(df)
+
+class PortfolioSetValue(object):
+    def __init__(self, allocation_set):
+        allocations = allocation_set.get_list()
+        self.tickers = [allocation.ticker for allocation in allocations]
+        parts = [allocation.number for allocation in allocations]
+        self.shares = pd.Series(parts, index=self.tickers)
+        self.processor = Pipe(
+            Filter(self.tickers),
+            Lambda(lambda df: df.mul(self.shares, axis=1)),
+            Sum("Value")
         )
 
     def process(self, df):
