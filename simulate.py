@@ -8,7 +8,6 @@ from trade.simulate import (Simulator, HoldMoney, HoldAllocation,
 import trade.type
 import trade.data.optimize
 from trade.type import Allocation
-import trade.data.optimize
 
 
 def simulate(tickers, baseline, start, end, cost):
