@@ -1,12 +1,28 @@
 import os
 import argparse
+import datetime
+import pandas as pd
 from pandas_datareader import data as pdr
 import yfinance as yf
 
 
+def create_usd(csv):
+    now = datetime.datetime.now()
+    dates = pd.date_range(
+        datetime.date(now.year - 40, now.month, now.day),
+        datetime.date(now.year, now.month, now.day))
+    df = pd.DataFrame(
+        1.0,
+        index=pd.Index(data=dates, name="Date"),
+        columns=["Open", "High", "Low", "Close", "Adj Close", "Volume"])
+    df.to_csv(csv)
+
 def load_ticker(ticker, dataDir):
     csv = os.path.join(dataDir, "%s.csv" % ticker)
     print("Download {} to {}".format(ticker, csv))
+    if ticker == "usd":
+        create_usd(csv)
+        return
     if not os.path.exists(dataDir):
         os.makedirs(dataDir)
 
